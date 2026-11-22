@@ -1,0 +1,548 @@
+<title>AK!15 Brain in Motion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one fixed full-bleed canvas (the brain) behind a scrolling column of story cards; the last
+   section hands the canvas over for free exploration. Single committed night-sky look. */
+:root {
+  --night: #0b0f17;
+  --panel: rgba(15, 20, 30, 0.84);
+  --line: #273246;
+  --ink: #eef1f6;
+  --ink-2: #a9b3c2;
+  --spark: #f3c35b;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+html, body { background: var(--night); color: var(--ink); font-family: var(--body); }
+body { overflow-x: hidden; }
+#stage { position: fixed; inset: 0; z-index: 0; }
+#stage canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+body.explore #stage canvas { touch-action: none; }
+#stage canvas:active { cursor: grabbing; }
+
+.story { position: relative; z-index: 1; pointer-events: none;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.step { min-height: 100vh; display: flex; align-items: center; padding-block: 12vh; }
+.step.hero { min-height: 92vh; }
+.card { pointer-events: auto; width: min(420px, 100%); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 16px; padding: 22px 24px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 18px 50px rgba(0,0,0,.35); }
+.card.bare { background: transparent; border: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 0; width: min(560px, 100%); }
+.eyebrow { font: 600 12px/1.2 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--spark); margin: 0 0 10px; }
+h1, h2 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(40px, 6.4vw, 76px); line-height: 1.02; font-weight: 700; letter-spacing: -.02em; }
+h2 { font-size: clamp(24px, 2.6vw, 32px); line-height: 1.15; font-weight: 700; }
+.card p { color: var(--ink-2); line-height: 1.55; margin: 10px 0 0; font-size: 16px; }
+.hero p.lead { font-size: 19px; color: var(--ink-2); max-width: 46ch; margin-top: 16px; }
+.cue { margin-top: 26px; font-size: 14px; color: var(--ink-2); display: flex; gap: 10px; align-items: center; }
+.cue span { display: inline-block; width: 22px; height: 34px; border: 2px solid var(--ink-2); border-radius: 12px; position: relative; }
+.cue span::after { content: ""; position: absolute; left: 50%; top: 6px; width: 4px; height: 7px; margin-left: -2px; border-radius: 2px; background: var(--spark); }
+@media (prefers-reduced-motion: no-preference) { .cue span::after { animation: cue 1.6s ease-in-out infinite; } @keyframes cue { 50% { transform: translateY(10px); opacity: .3; } } }
+.tally { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 6px; }
+.tally li { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; color: var(--ink); }
+.tally li img.flag, .flag { width: 20px; height: 15px; border-radius: 2px; vertical-align: -2px; margin-right: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.15); }
+.tip .flag { width: 24px; height: 18px; vertical-align: -3px; }
+.tally li b { font-variant-numeric: tabular-nums; color: var(--ink-2); font-weight: 500; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: 0; }
+.fact { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(243,195,91,.09); color: var(--ink); font-size: 17px; line-height: 1.5; }
+.fact::before { content: "✦ "; color: var(--spark); }
+.who { color: var(--ink-2); font-size: 15px; margin-top: 4px; }
+.chain { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chain span { font-size: 13px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-2); }
+.chain span.on { border-color: var(--spark); color: var(--night); background: var(--spark); font-weight: 600; }
+.tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--night); background: var(--spark); border-radius: 4px; padding: 2px 6px; margin-bottom: 10px; }
+
+/* progress rail */
+.rail { position: fixed; z-index: 3; right: max(14px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; }
+.rail button { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--ink-2); background: transparent; padding: 0; cursor: pointer; }
+.rail button.on { background: var(--spark); border-color: var(--spark); transform: scale(1.3); }
+.rail button:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--spark); outline-offset: 3px; }
+
+/* always-visible way back to the map page */
+.back { position: fixed; z-index: 4; top: calc(env(safe-area-inset-top, 0px) + 14px); left: max(16px, env(safe-area-inset-left, 0px)); text-decoration: none; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bar { padding-left: 148px; }
+/* explore UI */
+.bar { position: fixed; z-index: 3; top: calc(env(safe-area-inset-top, 0px) + 14px); left: max(16px, env(safe-area-inset-left, 0px)); right: max(40px, env(safe-area-inset-right, 0px));
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; opacity: 0; pointer-events: none; transform: translateY(-8px); transition: opacity .3s, transform .3s; }
+body.explore .bar { opacity: 1; pointer-events: auto; transform: none; }
+.bar input { flex: 1 1 180px; min-width: 0; max-width: 340px; font: 15px var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+.btn { font: 500 14px var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 13px; cursor: pointer; }
+.btn:hover { border-color: var(--spark); }
+.btn.primary { background: var(--spark); color: var(--night); border-color: var(--spark); font-weight: 600; }
+.drawer { position: fixed; z-index: 3; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); width: min(400px, calc(100% - 32px)); max-height: 60vh; overflow: auto; }
+.drawer[hidden] { display: none; }
+body.drawer-open #explore .card { opacity: 0; pointer-events: none; transition: opacity .25s; }
+.drawer .close { float: right; margin: -6px -8px 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chips span { font-size: 13px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-2); }
+.tip { position: fixed; z-index: 4; pointer-events: none; max-width: 300px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; font-size: 14px; line-height: 1.4; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.tip[hidden] { display: none; }
+.tip .f { color: var(--spark); margin-top: 4px; }
+.tip .r { color: var(--ink-2); }
+details.roster { margin-top: 14px; }
+details.roster summary { cursor: pointer; color: var(--ink-2); font-size: 14px; }
+details.roster ul { list-style: none; padding: 0; margin: 8px 0 0; columns: 2; column-gap: 10px; }
+details.roster li button { background: none; border: none; color: var(--ink); font: 14px var(--body); padding: 3px 0; cursor: pointer; text-align: left; }
+details.roster li button:hover { color: var(--spark); }
+.footnote { font-size: 13px; color: var(--ink-2); margin-top: 14px; }
+
+@media (min-width: 900px) { .step { padding-left: 2vw; } }
+@media (max-width: 899px) {
+  .step { align-items: flex-end; padding-block: 10vh 6vh; }
+  .step.hero { align-items: flex-start; padding-top: 14vh; }
+  .card { width: 100%; }
+  .rail { display: none; }
+  .drawer { max-height: 45vh; }
+}
+</style>
+
+<div id="stage" aria-hidden="true"><canvas id="c"></canvas></div>
+<nav class="rail" id="rail" aria-label="Story progress"></nav>
+<a class="btn back" id="mapLink" href="index.html">← Back to map</a>
+<div class="bar" id="bar" role="toolbar" aria-label="Explore controls">
+  <label for="q" class="sr" style="position:absolute;left:-9999px">Search fellows</label>
+  <input id="q" type="search" placeholder="Search a name, role or skill…" autocomplete="off">
+  <button class="btn primary" id="fun">✦ Fun fact</button>
+  <button class="btn" id="reset">Reset view</button>
+  <button class="btn" id="top">↑ Back to story</button>
+</div>
+<aside class="card drawer" id="drawer" hidden aria-live="polite"></aside>
+<div class="tip" id="tip" hidden role="tooltip"></div>
+<main class="story" id="story"></main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="data.js"></script>
+<script src="africa.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.BRAIN_DATA;
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const $ = (id) => document.getElementById(id);
+
+// ---------- data: 10 source clusters fold into 8 (a validated 8-slot palette, dark steps) ----------
+const MERGE = { "data-ai": "tech", "software-cloud": "tech", "enterprise-transformation": "enterprise", finance: "finance", health: "health",
+  engineering: "engops", "operations-quality": "engops", "growth-media": "growth", "programmes-people": "programmes", sustainability: "sustain" };
+const CL = [
+  { id: "tech", label: "Data, AI & Software", color: "#3987e5" },
+  { id: "growth", label: "Business Growth & Media", color: "#d95926" },
+  { id: "health", label: "Health & Life Sciences", color: "#199e70" },
+  { id: "engops", label: "Engineering, Operations & Quality", color: "#c98500" },
+  { id: "programmes", label: "Programmes, Projects & People", color: "#d55181" },
+  { id: "sustain", label: "Sustainability & ESG", color: "#0ca30c" },
+  { id: "enterprise", label: "Enterprise Systems & Transformation", color: "#9085e9" },
+  { id: "finance", label: "Finance, Banking & Payments", color: "#e66767" },
+];
+const clById = Object.fromEntries(CL.map((c, i) => [c.id, { ...c, i }]));
+
+const fellows = D.fellows.map((f, i) => {
+  const cls = [...new Set((f.clusters || []).map((c) => MERGE[c]).filter(Boolean))];
+  return { type: "f", id: f.id, i, name: f.name || f.id, role: f.role || "", org: f.org || "", country: f.country || "", fact: f.beyond_cv || "",
+    skills: f.skills || [], clusters: cls, primary: cls[0] || "tech", color: clById[cls[0] || "tech"].color, r: 7 };
+});
+const skills = D.skills.map((s) => ({ type: "s", id: s.id, label: s.label, count: s.count, r: 2.5 + Math.sqrt(s.count) * 1.6 }));
+const byId = Object.fromEntries([...fellows, ...skills].map((n) => [n.id, n]));
+const links = [];
+fellows.forEach((f) => f.skills.forEach((s, k) => byId[s] && links.push({ source: f, target: byId[s], off: ((f.i * 7 + k * 13) % 23) / 23 })));
+const nodes = [...fellows, ...skills];
+for (const c of CL) c.members = fellows.filter((f) => f.primary === c.id);
+const countries = d3.rollups(fellows, (v) => v.length, (f) => f.country).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+const neighbours = (f) => new Set([f.id, ...f.skills]);
+
+// ---------- layout targets ----------
+const TAU = Math.PI * 2;
+const ring = (i, n, R, start = -Math.PI / 2) => [Math.cos(start + (TAU * i) / n) * R, Math.sin(start + (TAU * i) / n) * R];
+const clAnchor = Object.fromEntries(CL.map((c, i) => [c.id, ring(i, CL.length, 300)]));
+// ---------- Africa map: shapes, home-country anchors, starting points on land ----------
+const GEO = window.AFRICA_GEO || { type: "FeatureCollection", features: [] }, FLAGS = window.AFRICA_FLAGS || {};
+// coordinate rounding can flip a tiny ring, which d3 would read as "the whole globe minus this ring"
+for (const ft of GEO.features) {
+  const g = ft.geometry, polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+  for (const poly of polys) if (d3.geoArea({ type: "Polygon", coordinates: poly }) > TAU) poly.forEach((r) => r.reverse());
+}
+const proj = d3.geoMercator().fitExtent([[-400, -440], [400, 440]], GEO);
+const gpath = d3.geoPath(proj);
+const homeSet = new Set(countries.map(([c]) => c));
+const shapes = GEO.features.map((ft) => ({ name: ft.properties.name, ft, p: new Path2D(gpath(ft) || ""), home: homeSet.has(ft.properties.name) }));
+const shapeBy = Object.fromEntries(shapes.map((s) => [s.name, s]));
+const continent = new Path2D(gpath(GEO) || "");
+const coAnchor = Object.fromEntries(countries.map(([c]) => [c, shapeBy[c] ? proj(d3.geoCentroid(shapeBy[c].ft)) : [0, 0]]));
+const flagImg = Object.fromEntries(Object.entries(FLAGS).map(([c, src]) => { const im = new Image(); im.src = src; return [c, im]; }));
+const flagTag = (c, cls = "flag") => (FLAGS[c] ? `<img class="${cls}" src="${FLAGS[c]}" alt="">` : "");
+// well-spread points on land (Halton sequence), one per fellow, for the opening scene
+const halton = (i, b) => { let f = 1, r = 0; while (i > 0) { f /= b; r += f * (i % b); i = Math.floor(i / b); } return r; };
+const landPts = [];
+{
+  const [[bx0, by0], [bx1, by1]] = gpath.bounds(GEO);
+  for (let i = 1; landPts.length < fellows.length && i < 4000; i++) {
+    const x = bx0 + halton(i, 2) * (bx1 - bx0), y = by0 + halton(i, 3) * (by1 - by0);
+    if (!GEO.features.length || d3.geoContains(GEO, proj.invert([x, y]))) landPts.push([x, y]);
+  }
+}
+const GOLD = Math.PI * (3 - Math.sqrt(5));
+fellows.forEach((f, i) => { [f.lx, f.ly] = landPts[i] || [0, 0]; f.ph = i * GOLD; f.x = f.lx; f.y = f.ly; });
+const drift = (f) => [f.lx + Math.cos(spin * 7 + f.ph) * 7, f.ly + Math.sin(spin * 5 + f.ph * 1.3) * 7];
+skills.forEach((s) => {
+  const fs = links.filter((l) => l.target === s).map((l) => clAnchor[l.source.primary]);
+  const mx = d3.mean(fs, (p) => p[0]) || 0, my = d3.mean(fs, (p) => p[1]) || 0;
+  s.hx = mx * 0.42; s.hy = my * 0.42; s.x = 0; s.y = 0;
+});
+let spin = 0, dotK = 1; // dotK: fellows shrink a little on the map so small countries can hold them
+function setTargets(layout) {
+  state.layout = layout;
+  for (const f of fellows) {
+    let t;
+    if (layout === "stars") t = drift(f);
+    else if (layout === "countries") t = coAnchor[f.country] || [0, 0];
+    else if (layout === "clusters") t = clAnchor[f.primary];
+    else t = [clAnchor[f.primary][0] * 1.22, clAnchor[f.primary][1] * 1.22];
+    f.tx = t[0]; f.ty = t[1];
+  }
+  for (const s of skills) { s.tx = layout === "network" ? s.hx : 0; s.ty = layout === "network" ? s.hy : 0; }
+  sim.force("link").strength(layout === "network" ? 0.035 : 0);
+  collide.radius(collide.radius()); charge.strength(charge.strength()); // re-read per-layout sizes
+  sim.alpha(reduce ? 1 : 0.9); // ticked by the render loop, never by d3's own timer
+  if (reduce) { sim.tick(300); }
+}
+
+// ---------- physics ----------
+const state = { layout: "stars", scene: 0, explore: false, hl: null, hover: null, hoverC: null, sel: null };
+const vis = { links: 0, skills: 0, particles: 0, glow: 0, clusterLabels: 0, countryLabels: 0, map: 0, homes: 0 };
+const visT = { ...vis };
+// fellows sit tighter inside their home country so small countries can hold them
+const collide = d3.forceCollide((d) => (d.type === "f" ? (state.layout === "countries" ? 7.5 : state.layout === "stars" ? 9 : 15) : state.layout === "network" ? d.r + 9 : 0)).iterations(2);
+const charge = d3.forceManyBody().strength((d) => (d.type === "f" ? (state.layout === "network" || state.layout === "clusters" ? -18 : -4) : state.layout === "network" ? -30 : 0)); // hidden skill nodes must not push fellows off the map
+const sim = d3.forceSimulation(nodes)
+  .velocityDecay(0.32).alphaDecay(reduce ? 0.2 : 0.018)
+  // pull toward each node's current scene target; read live every tick (d3.forceX would cache targets)
+  .force("target", (alpha) => {
+    for (const n of nodes) {
+      const k = (n.type === "f" ? 0.09 : 0.06) * alpha;
+      n.vx += ((n.tx ?? 0) - n.x) * k; n.vy += ((n.ty ?? 0) - n.y) * k;
+    }
+  })
+  .force("collide", collide)
+  .force("charge", charge)
+  .force("link", d3.forceLink(links).distance(150).strength(0));
+sim.stop();
+
+// ---------- canvas, camera ----------
+const canvas = $("c"), ctx = canvas.getContext("2d");
+let W = 0, H = 0, DPR = 1, T = d3.zoomIdentity;
+const stars = d3.range(240).map((i) => ({ x: (i * 97.13) % 1, y: (i * 57.71 + 0.31) % 1, z: 0.2 + ((i * 13) % 10) / 12, s: ((i * 7) % 5) / 5 }));
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = canvas.clientWidth; H = canvas.clientHeight;
+  canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+}
+const zoom = d3.zoom().scaleExtent([0.25, 6])
+  .filter((e) => {
+    if (e.type === "wheel") return state.explore || e.ctrlKey;
+    if (e.type.startsWith("touch")) return state.explore;
+    return !e.button;
+  })
+  .on("zoom", (e) => { T = e.transform; hideTip(); });
+const sel = d3.select(canvas); // drag is attached before zoom (below) so grabbing a node wins over panning
+const wide = () => W >= 900;
+function viewFor(cx, cy, R) {
+  const side = wide() ? 470 : 0;
+  const top = state.explore ? 70 : 0;
+  const bottom = !wide() && !state.explore ? H * 0.42 : 0;
+  const aw = W - side - 40, ah = H - top - bottom - 40;
+  const k = Math.max(0.25, Math.min(6, Math.min(aw, ah) / (2 * R)));
+  const sx = side + 20 + aw / 2, sy = top + 20 + ah / 2;
+  return d3.zoomIdentity.translate(sx, sy).scale(k).translate(-cx, -cy);
+}
+function fly(t, ms = 1400) {
+  if (reduce) sel.call(zoom.transform, t);
+  else sel.transition().duration(ms).ease(d3.easeCubicInOut).call(zoom.transform, t);
+}
+const fitR = () => ({ stars: 470, countries: 470, clusters: 450 }[state.layout] || 590) * (W < 600 ? 1.25 : 1);
+function flyAll() { fly(viewFor(0, 0, fitR())); }
+function flyTo(set) {
+  const pts = [...set].map((id) => byId[id]).filter(Boolean);
+  if (!pts.length) return flyAll();
+  const [x0, x1] = d3.extent(pts, (p) => p.tx ?? p.x), [y0, y1] = d3.extent(pts, (p) => p.ty ?? p.y);
+  fly(viewFor((x0 + x1) / 2, (y0 + y1) / 2, Math.max(140, Math.max(x1 - x0, y1 - y0) / 2 + 90)));
+}
+function flyToNode(n, R = 150) { fly(viewFor(n.tx ?? n.x, n.ty ?? n.y, R)); }
+
+// ---------- render loop ----------
+function quad(a, b) { const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2; return [mx * 0.82, my * 0.82]; }
+function alphaOf(n) { return state.hl ? (state.hl.has(n.id) ? 1 : 0.13) : 1; }
+function frame(now) {
+  for (const k in vis) vis[k] += (visT[k] - vis[k]) * (reduce ? 1 : 0.06);
+  for (const n of nodes) n.a = (n.a ?? 1) + (alphaOf(n) - (n.a ?? 1)) * (reduce ? 1 : 0.12);
+  if (state.layout === "stars" && !reduce) { spin += 0.0009; for (const f of fellows) [f.tx, f.ty] = drift(f); if (sim.alpha() < 0.08) sim.alpha(0.08); }
+  if (state.layout === "countries" && sim.alpha() < 0.05) sim.alpha(0.05); // keep pulling until everyone is home
+  dotK += ((state.layout === "countries" ? 0.72 : 1) - dotK) * (reduce ? 1 : 0.08);
+  sim.tick();
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = "#0b0f17"; ctx.fillRect(0, 0, W, H);
+  // starfield with parallax
+  for (const s of stars) {
+    const x = ((s.x * W + T.x * s.z * 0.12) % W + W) % W, y = ((s.y * H + T.y * s.z * 0.12) % H + H) % H;
+    const tw = reduce ? 0.5 : 0.35 + 0.35 * Math.sin(now / 900 + s.x * 40);
+    ctx.fillStyle = `rgba(200,215,255,${(0.15 + s.s * 0.35) * tw})`;
+    ctx.fillRect(x, y, s.z * 1.6, s.z * 1.6);
+  }
+  ctx.save(); ctx.translate(T.x, T.y); ctx.scale(T.k, T.k);
+  // Africa
+  if (vis.map > 0.01) {
+    ctx.shadowColor = "rgba(243,195,91,.35)"; ctx.shadowBlur = 28 * vis.map;
+    ctx.fillStyle = `rgba(110,140,190,${0.1 * vis.map})`; ctx.fill(continent);
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 0.8 / T.k;
+    for (const s of shapes) {
+      const lit = s.home ? vis.homes : 0, hov = state.hoverC === s ? 1 : 0;
+      if (lit > 0.01 || hov) { ctx.fillStyle = `rgba(243,195,91,${(0.17 * lit + 0.12 * hov) * Math.max(vis.map, 0.4)})`; ctx.fill(s.p); }
+      ctx.strokeStyle = lit > 0.01 ? `rgba(243,195,91,${(0.25 + 0.5 * lit) * vis.map})` : `rgba(160,185,225,${0.32 * vis.map})`;
+      ctx.stroke(s.p);
+    }
+  }
+  // cluster nebulae
+  if (vis.glow > 0.01) for (const c of CL) {
+    if (!c.members.length) continue;
+    const x = d3.mean(c.members, (f) => f.x), y = d3.mean(c.members, (f) => f.y);
+    const dim = state.hl ? (c.members.some((f) => state.hl.has(f.id)) ? 1 : 0.25) : 1;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, 120);
+    g.addColorStop(0, hexA(c.color, 0.22 * vis.glow * dim)); g.addColorStop(1, hexA(c.color, 0));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 120, 0, TAU); ctx.fill();
+  }
+  // links
+  if (vis.links > 0.01) {
+    ctx.lineWidth = 1.1 / T.k;
+    for (const l of links) {
+      const on = state.hl ? state.hl.has(l.source.id) && state.hl.has(l.target.id) : true;
+      const a = vis.links * (state.hl ? (on ? 0.75 : 0.04) : 0.26);
+      if (a < 0.01) continue;
+      const [cx, cy] = quad(l.source, l.target);
+      ctx.strokeStyle = hexA(l.source.color, a);
+      ctx.lineWidth = (on && state.hl ? 2 : 1.1) / T.k;
+      ctx.beginPath(); ctx.moveTo(l.source.x, l.source.y); ctx.quadraticCurveTo(cx, cy, l.target.x, l.target.y); ctx.stroke();
+    }
+  }
+  // signals flowing fellow → skill
+  if (vis.particles > 0.01 && !reduce) {
+    for (const l of links) {
+      const on = state.hl ? state.hl.has(l.source.id) && state.hl.has(l.target.id) : true;
+      if (!on) continue;
+      const p = (now / 2600 + l.off) % 1, q = 1 - p;
+      const [cx, cy] = quad(l.source, l.target);
+      const x = q * q * l.source.x + 2 * q * p * cx + p * p * l.target.x, y = q * q * l.source.y + 2 * q * p * cy + p * p * l.target.y;
+      ctx.fillStyle = hexA(l.source.color, vis.particles * 0.95);
+      ctx.beginPath(); ctx.arc(x, y, (state.hl ? 2.6 : 1.8) / Math.sqrt(T.k), 0, TAU); ctx.fill();
+    }
+  }
+  // skill nodes
+  if (vis.skills > 0.01) for (const s of skills) {
+    ctx.globalAlpha = vis.skills * s.a;
+    ctx.shadowColor = "rgba(255,255,255,.8)"; ctx.shadowBlur = 10;
+    ctx.fillStyle = "#e9eef7"; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
+  }
+  // fellow nodes
+  for (const f of fellows) {
+    ctx.globalAlpha = f.a;
+    const pulse = state.sel === f || state.hover === f ? 1 : 0;
+    ctx.shadowColor = f.color; ctx.shadowBlur = 14 + pulse * 16;
+    ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(f.x, f.y, f.r * dotK + pulse * 3, 0, TAU); ctx.fill();
+    if (pulse) { ctx.shadowBlur = 0; ctx.strokeStyle = "#f3c35b"; ctx.lineWidth = 2 / T.k; ctx.beginPath(); ctx.arc(f.x, f.y, f.r + 7, 0, TAU); ctx.stroke(); }
+  }
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  ctx.restore();
+  drawLabels();
+}
+function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${Math.max(0, Math.min(1, a))})`; }
+function text(str, x, y, { size = 13, weight = 500, color = "#eef1f6", align = "center", alpha = 1, font = "Inter" } = {}) {
+  if (alpha < 0.02) return;
+  ctx.globalAlpha = alpha; ctx.font = `${weight} ${size}px ${font}, "Segoe UI", system-ui, sans-serif`;
+  ctx.textAlign = align; ctx.textBaseline = "middle";
+  ctx.lineWidth = 4; ctx.strokeStyle = "rgba(11,15,23,.85)"; ctx.strokeText(str, x, y);
+  ctx.fillStyle = color; ctx.fillText(str, x, y); ctx.globalAlpha = 1;
+}
+const sx = (x) => T.applyX(x), sy = (y) => T.applyY(y);
+// which side of its country each label sits on, chosen so East-African neighbours don't collide
+const LBL = { Morocco: [-0.8, -0.6], Egypt: [0.7, -0.7], Sudan: [-1, -0.1], Ethiopia: [0.8, -0.6], Kenya: [1, 0.15], Uganda: [-1, 0.1],
+  Tanzania: [1, 0.45], Malawi: [0.6, 0.8], Ghana: [-0.6, 0.8], Nigeria: [-0.3, -1], Cameroon: [0.3, 1] };
+function drawLabels() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (vis.countryLabels > 0.02) for (const [c, n] of countries) {
+    const [x, y] = coAnchor[c], [ux0, uy0] = LBL[c] || [0, 1], ul = Math.hypot(ux0, uy0), ux = ux0 / ul, uy = uy0 / ul;
+    const members = fellows.filter((f) => f.country === c);
+    const spread = d3.max(members, (f) => Math.hypot(f.x - x, f.y - y)) || 0;
+    const off = (spread + 9) * T.k + 14, X = sx(x) + ux * off, Y = sy(y) + uy * off;
+    const label = `${c} · ${n}`, size = W < 600 ? 12 : 14;
+    ctx.font = `600 ${size}px Inter, "Segoe UI", system-ui, sans-serif`;
+    const fw = 20, fh = 15, gap = 6, w = fw + gap + ctx.measureText(label).width;
+    const left = ux > 0.35 ? X : ux < -0.35 ? X - w : X - w / 2;
+    const im = flagImg[c];
+    ctx.globalAlpha = vis.countryLabels;
+    if (im && im.complete && im.naturalWidth) { ctx.drawImage(im, left, Y - fh / 2, fw, fh); ctx.strokeStyle = "rgba(255,255,255,.25)"; ctx.lineWidth = 1; ctx.strokeRect(left, Y - fh / 2, fw, fh); }
+    ctx.globalAlpha = 1;
+    text(label, left + fw + gap, Y, { size, weight: 600, align: "left", alpha: vis.countryLabels });
+  }
+  if (vis.clusterLabels > 0.02) for (const c of CL) {
+    if (!c.members.length) continue;
+    const x = d3.mean(c.members, (f) => f.x), y = d3.mean(c.members, (f) => f.y), len = Math.hypot(x, y) || 1;
+    const push = state.layout === "network" ? 105 : 78;
+    const dim = state.hl ? (c.members.some((f) => state.hl.has(f.id)) ? 1 : 0.3) : 1;
+    text(c.label, sx(x + (x / len) * push), sy(y + (y / len) * push), { size: W < 600 ? 11 : 15, weight: 700, color: c.color, alpha: vis.clusterLabels * dim, font: "Space Grotesk" });
+  }
+  if (vis.skills > 0.3) for (const s of skills) {
+    const show = state.hl ? state.hl.has(s.id) : T.k > 1.25 || s.count >= 6;
+    if (show) text(s.label, sx(s.x), sy(s.y) - s.r * T.k - 11, { size: 12, color: "#c9d2df", alpha: vis.skills * s.a });
+  }
+  const few = state.hl && state.hl.size <= 14;
+  for (const f of fellows) {
+    if ((few && state.hl.has(f.id)) || T.k > 1.7 || state.sel === f || state.hover === f) {
+      text(f.name, sx(f.x), sy(f.y) + f.r * T.k + 13, { size: 13, weight: 600, alpha: Math.max(f.a, 0.35) });
+    }
+  }
+}
+
+// ---------- scenes ----------
+const top4Facts = (() => {
+  const seen = new Set(), out = [];
+  for (const c of CL) for (const f of fellows) if (!seen.has(c.id) && f.primary === c.id && f.fact.length >= 25 && f.fact.length <= 140) { seen.add(c.id); out.push(f); }
+  return out.slice(0, 4);
+})();
+const sc = D.scenario || { steps: [] };
+const topSkills = [...skills].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)).slice(0, 5);
+const N = fellows.length;
+const SCENES = [
+  { id: "start", layout: "stars", vis: { map: 1 }, cam: "all", hero: true,
+    html: `<div class="card bare"><p class="eyebrow">AFRIKA KOMMT! 15 · What we offer</p><h1>${N} minds.<br>One collective impact.</h1><p class="lead">A living map of what the cohort brings across Africa: built from our CVs and LinkedIn profiles, with a personal fact from each of us.</p><div class="cue"><span></span>Scroll to see the cohort connect</div></div>` },
+  { id: "countries", layout: "countries", vis: { countryLabels: 1, map: 1, homes: 1 }, cam: "all",
+    html: `<div class="card"><p class="eyebrow">Where we come from</p><h2>${countries.length} countries, one cohort</h2><ul class="tally">${countries.map(([c, n]) => `<li><span>${flagTag(c)}${esc(c)}</span> <b>${n}</b></li>`).join("")}</ul></div>` },
+  { id: "clusters", layout: "clusters", vis: { clusterLabels: 1, glow: 1, map: 0.3 }, cam: "all",
+    html: `<div class="card"><p class="eyebrow">What we bring</p><h2>${CL.filter((c) => c.members.length).length} clusters of capability</h2><p>Each fellow sits with the cluster of their main experience. Many of us also work across a second one.</p><ul class="tally">${CL.filter((c) => c.members.length).map((c) => `<li><span><i class="dot" style="background:${c.color}"></i>${esc(c.label)}</span><b>${c.members.length}</b></li>`).join("")}</ul></div>` },
+  { id: "network", layout: "network", vis: { links: 1, skills: 1, particles: 1, clusterLabels: 0.9, glow: 0.6, map: 0.14 }, cam: "all",
+    html: `<div class="card"><p class="eyebrow">How we connect</p><h2>${skills.length} shared skills link us together</h2><p>Each line is a skill a fellow brings. Where lines meet, people from different fields share ground and can build on each other's work.</p><ul class="tally">${topSkills.map((s) => `<li>${esc(s.label)} <b>${s.count} fellows</b></li>`).join("")}</ul></div>` },
+  ...top4Facts.map((f, i) => ({ id: "fact-" + f.id, layout: "network", vis: { links: 0.7, skills: 1, particles: 0.6, clusterLabels: 0.25, glow: 0.35 }, hl: neighbours(f), cam: { node: f }, sel: f,
+    html: `<div class="card"><p class="eyebrow">Beyond the CV · ${i + 1} of ${top4Facts.length}</p><h2>${esc(f.name)}</h2><p class="who">${esc(f.role)}${f.org ? ` · ${esc(f.org)}` : ""}</p><div class="fact">${esc(f.fact)}</div></div>` })),
+  ...sc.steps.map((s, i) => ({ id: "challenge-" + i, layout: "network", vis: { links: 1, skills: 1, particles: 1, clusterLabels: 0.3, glow: 0.3 }, hl: new Set([...s.fellows, ...s.skills]), cam: "hl",
+    html: `<div class="card">${i === 0 ? `<span class="tag">Illustrative</span>` : ""}<p class="eyebrow">What we can do together · step ${i + 1} of ${sc.steps.length}</p><h2>${esc(s.label)}</h2><p>${i === 0 ? `Challenge: ${esc((sc.title || "").replace(/^Illustrative challenge: /, ""))}. ` : ""}${s.fellows.length} fellows bring ${esc(s.skills.join(", "))}.</p><div class="chain">${sc.steps.map((x, j) => `<span class="${j === i ? "on" : ""}">${j + 1}. ${esc(x.label)}</span>`).join("")}</div></div>` })),
+  { id: "explore", layout: "network", vis: { links: 1, skills: 1, particles: 1, clusterLabels: 1, glow: 0.6, map: 0.14 }, cam: "all", explore: true,
+    html: `<div class="card"><p class="eyebrow">Your turn</p><h2>Bring us your challenge.</h2><p>Drag to move around, scroll or pinch to zoom, and grab a fellow to pull the network. Click anyone to see what they bring, or press ✦ Fun fact for a guided tour.</p><details class="roster"><summary>All ${N} fellows</summary><ul>${[...fellows].sort((a, b) => a.name.localeCompare(b.name)).map((f) => `<li><button data-f="${esc(f.id)}">${esc(f.name)}</button></li>`).join("")}</ul></details><p class="footnote">Internal: shared with AFRIKA KOMMT! partner companies. The challenge steps are illustrative.</p></div>` },
+];
+
+const story = $("story"), rail = $("rail");
+story.innerHTML = SCENES.map((s, i) => `<section class="step${s.hero ? " hero" : ""}" data-i="${i}" id="${s.id}">${s.html}</section>`).join("");
+rail.innerHTML = SCENES.map((s, i) => `<button data-i="${i}" aria-label="Go to part ${i + 1}: ${esc(s.id.replace(/-/g, " "))}"></button>`).join("");
+rail.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => story.children[b.dataset.i].scrollIntoView({ behavior: reduce ? "auto" : "smooth" })));
+story.querySelectorAll("[data-f]").forEach((b) => b.addEventListener("click", () => select(byId[b.dataset.f], true)));
+
+function applyScene(i) {
+  if (i === state.scene && state.started) return;
+  state.started = true; state.scene = i;
+  const s = SCENES[i];
+  for (const k in visT) visT[k] = s.vis[k] ?? 0;
+  state.explore = !!s.explore;
+  document.body.classList.toggle("explore", state.explore);
+  state.hl = s.hl || null; state.sel = s.sel || null;
+  if (!state.explore) { $("drawer").hidden = true; document.body.classList.remove("drawer-open"); }
+  if (state.layout !== s.layout) setTargets(s.layout);
+  if (s.cam === "all") flyAll(); else if (s.cam === "hl") flyTo(s.hl); else if (s.cam?.node) flyTo(s.hl);
+  rail.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === i));
+}
+const io = new IntersectionObserver((es) => {
+  const best = es.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+  if (best) applyScene(+best.target.dataset.i);
+}, { threshold: [0.35, 0.6] });
+story.querySelectorAll(".step").forEach((s) => io.observe(s));
+
+// ---------- interaction ----------
+function worldAt(e) { const [x, y] = d3.pointer(e, canvas); return T.invert([x, y]); }
+function pickCountry(e) {
+  if (vis.map < 0.3 || !shapes.length) return null;
+  const ll = proj.invert(worldAt(e));
+  return shapes.find((s) => s.home && d3.geoContains(s.ft, ll)) || shapes.find((s) => d3.geoContains(s.ft, ll)) || null;
+}
+function pick(e, rad = 16) { const [x, y] = worldAt(e); const n = sim.find(x, y, rad / T.k + 6); return n && n.type === "f" ? n : null; }
+function showTip(f, e) {
+  const tip = $("tip");
+  tip.innerHTML = `<strong>${esc(f.name)}</strong><div class="r">${esc(f.role)}${f.org ? ` · ${esc(f.org)}` : ""}</div><div class="r">${flagTag(f.country)}${esc(f.country)}</div>${f.fact ? `<div class="f">✦ ${esc(f.fact)}</div>` : ""}`;
+  placeTip(e);
+}
+function showCountryTip(s, e) {
+  const tip = $("tip"), who = fellows.filter((f) => f.country === s.name);
+  tip.innerHTML = `<strong>${flagTag(s.name)}${esc(s.name)}</strong>` + (who.length
+    ? `<div class="r">${who.length} fellow${who.length === 1 ? "" : "s"}: ${esc(who.map((f) => f.name).join(", "))}</div>`
+    : "");
+  placeTip(e);
+}
+function placeTip(e) {
+  const tip = $("tip");
+  tip.hidden = false;
+  const px = e.clientX + 16, py = e.clientY + 12, tw = tip.offsetWidth, th = tip.offsetHeight;
+  tip.style.left = Math.min(px, window.innerWidth - tw - 12) + "px";
+  tip.style.top = Math.min(py, window.innerHeight - th - 12) + "px";
+}
+function hideTip() { $("tip").hidden = true; }
+canvas.addEventListener("pointermove", (e) => {
+  const f = pick(e);
+  state.hover = f;
+  canvas.style.cursor = f ? "pointer" : "";
+  state.hoverC = f ? null : pickCountry(e);
+  if (f) showTip(f, e); else if (state.hoverC) showCountryTip(state.hoverC, e); else hideTip();
+});
+canvas.addEventListener("pointerleave", () => { state.hover = null; state.hoverC = null; hideTip(); });
+canvas.addEventListener("click", (e) => { const f = pick(e); if (f && state.explore) select(f, true); });
+
+function select(f, open = true) {
+  if (!f) return;
+  if (!state.explore) { story.lastElementChild.scrollIntoView({ behavior: "auto" }); applyScene(SCENES.length - 1); }
+  state.sel = f; state.hl = neighbours(f);
+  const peers = new Set(); links.forEach((l) => { if (f.skills.includes(l.target.id) && l.source !== f) peers.add(l.source.id); });
+  peers.forEach((p) => state.hl.add(p));
+  flyToNode(f, 320);
+  if (!open) return;
+  const d = $("drawer");
+  d.innerHTML = `<button class="btn close" id="dclose" aria-label="Close">✕</button><p class="eyebrow">${flagTag(f.country)}${esc(f.country)}</p><h2>${esc(f.name)}</h2><p class="who">${esc(f.role)}${f.org ? ` · ${esc(f.org)}` : ""}</p>${f.fact ? `<div class="fact">${esc(f.fact)}</div>` : ""}<div class="chips">${f.clusters.map((c) => `<span><i class="dot" style="background:${clById[c].color}"></i>${esc(clById[c].label)}</span>`).join("")}</div><p style="margin-top:12px">Skills: ${esc(f.skills.join(", "))}</p><p>Shares skills with ${peers.size} other fellow${peers.size === 1 ? "" : "s"}, lit up on the map.</p>`;
+  d.hidden = false; document.body.classList.add("drawer-open");
+  $("dclose").onclick = clearSel;
+}
+function clearSel() { state.sel = null; state.hl = null; $("drawer").hidden = true; document.body.classList.remove("drawer-open"); flyAll(); }
+
+// drag fellows (explore only); empty space falls through to pan/zoom
+const drag = d3.drag()
+  .filter((e) => state.explore && !e.button)
+  .subject((e) => { const [x, y] = T.invert(d3.pointer(e, canvas)); const n = sim.find(x, y, 20 / T.k); return n && n.type === "f" ? n : null; })
+  .on("start", (e) => { if (!e.active) sim.alphaTarget(0.25); e.subject.fx = e.subject.x; e.subject.fy = e.subject.y; })
+  .on("drag", (e) => { const [x, y] = T.invert(d3.pointer(e, canvas)); e.subject.fx = x; e.subject.fy = y; })
+  .on("end", (e) => { if (!e.active) sim.alphaTarget(0); e.subject.fx = null; e.subject.fy = null; });
+sel.call(drag).call(zoom).on("dblclick.zoom", null);
+canvas.style.touchAction = ""; // hand touch-action back to the CSS (pan-y in the story, none while exploring)
+
+// explore toolbar
+let funIdx = -1;
+const withFacts = fellows.filter((f) => f.fact);
+$("fun").onclick = () => { funIdx = (funIdx + 1) % withFacts.length; select(withFacts[funIdx], true); };
+$("reset").onclick = () => { $("q").value = ""; clearSel(); };
+$("top").onclick = () => { clearSel(); window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }); };
+$("q").addEventListener("input", (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  state.sel = null; $("drawer").hidden = true;
+  if (!q) { state.hl = null; flyAll(); return; }
+  const hit = fellows.filter((f) => [f.name, f.role, f.org, f.country, ...f.skills].join(" ").toLowerCase().includes(q));
+  state.hl = new Set(hit.flatMap((f) => [f.id, ...f.skills.filter((s) => s.toLowerCase().includes(q))]));
+  skills.filter((s) => s.label.toLowerCase().includes(q)).forEach((s) => { state.hl.add(s.id); links.forEach((l) => l.target === s && state.hl.add(l.source.id)); });
+  if (state.hl.size) flyTo(state.hl);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.explore) clearSel(); });
+
+// ---------- boot ----------
+window.addEventListener("resize", () => { resize(); const s = SCENES[state.scene]; if (s.cam === "all" && !state.sel) sel.call(zoom.transform, viewFor(0, 0, fitR())); });
+resize();
+setTargets("stars");
+sim.tick(reduce ? 300 : 60);
+sel.call(zoom.transform, viewFor(0, 0, fitR()));
+applyScene(0);
+d3.timer(frame);
+})();
+</script>

@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AK!15 Collective Brain</title>
+<style>
+:root {
+  --bg: #0f1419; --panel: #161d24; --line: #26313b; --text: #e8edf2; --muted: #9aa7b4;
+  --accent: #f2b544; --dim: 0.14; --font: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+:root[data-theme="light"] { --bg: #f6f7f9; --panel: #ffffff; --line: #dfe3e8; --text: #14202b; --muted: #55636f; --accent: #9a5b00; --dim: 0.12; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }
+button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+button:hover, button:focus-visible { border-color: var(--accent); outline: none; }
+button[aria-pressed="true"] { background: var(--accent); color: #111; border-color: var(--accent); }
+.linkbtn { display: inline-block; text-decoration: none; font-weight: 600; color: #111; background: var(--accent); border: 1px solid var(--accent); border-radius: 6px; padding: 6px 12px; }
+.linkbtn:hover, .linkbtn:focus-visible { filter: brightness(1.08); outline: none; box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { display: grid; grid-template-rows: auto auto 1fr; height: 100vh; }
+header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+header h1 { font-size: 20px; margin: 0; letter-spacing: .2px; }
+header .sub { color: var(--muted); font-size: 14px; }
+header .spacer { flex: 1; }
+.banner { background: #7a2e0e; color: #fff; padding: 6px 20px; font-size: 14px; font-weight: 600; text-align: center; }
+.banner[hidden] { display: none; }
+.banner.fixture { background: #234a7a; }
+
+.main { display: grid; grid-template-columns: 1fr 380px; min-height: 0; }
+.stage { position: relative; min-height: 0; display: flex; flex-direction: column; }
+.toolbar { display: flex; gap: 8px; padding: 10px 16px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.toolbar input { flex: 1; min-width: 160px; font: inherit; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--text); }
+.graph-wrap { flex: 1; min-height: 0; position: relative; }
+svg#graph { width: 100%; height: 100%; display: block; }
+.directory { flex: 1; overflow: auto; padding: 12px 16px; }
+.directory[hidden], .graph-wrap[hidden] { display: none; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--bg); }
+td button { padding: 2px 8px; }
+
+aside { border-left: 1px solid var(--line); background: var(--panel); overflow: auto; padding: 16px 18px; }
+aside h2 { font-size: 18px; margin: 4px 0 4px; }
+aside h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 18px 0 6px; }
+aside p { margin: 6px 0; line-height: 1.45; }
+.muted { color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 13px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); }
+button.chip { padding: 3px 9px; }
+.swatch { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.legend { list-style: none; margin: 0; padding: 0; }
+.legend li button { width: 100%; text-align: left; border: none; padding: 5px 4px; display: flex; justify-content: space-between; gap: 12px; }
+.legend li button:hover { background: rgba(127,127,127,.12); }
+.stat { font-size: 30px; font-weight: 700; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stats div { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.stats small { color: var(--muted); }
+.empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 40px; color: var(--muted); font-size: 18px; pointer-events: none; }
+
+/* graph */
+.graph-wrap { background: radial-gradient(circle at 50% 50%, rgba(90,130,220,.16), rgba(90,130,220,.04) 45%, transparent 70%); }
+:root[data-theme="light"] .graph-wrap { background: radial-gradient(circle at 50% 50%, rgba(90,130,220,.10), transparent 65%); }
+.edge { fill: none; stroke-opacity: .32; stroke-width: 1.3; }
+@media (prefers-reduced-motion: no-preference) {
+  .edge.intro { stroke-dasharray: 1; stroke-dashoffset: 1; animation: grow 1.4s ease-out forwards; }
+  .node.intro { opacity: 0; animation: fadein .6s ease-out forwards; }
+  @keyframes grow { to { stroke-dashoffset: 0; } }
+  @keyframes fadein { to { opacity: 1; } }
+}
+.tip { position: absolute; pointer-events: none; max-width: 340px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; box-shadow: 0 8px 28px rgba(0,0,0,.35); font-size: 14px; line-height: 1.4; z-index: 5; }
+.tip[hidden] { display: none; }
+.tip .fact { margin-top: 6px; color: var(--accent); }
+.factbox { border-left: 3px solid var(--accent); padding: 6px 10px; background: rgba(242,181,68,.08); border-radius: 0 6px 6px 0; }
+.caption .card .fact { color: var(--accent); display: block; margin-top: 6px; font-size: 18px; }
+.node { cursor: pointer; }
+.node circle { stroke: var(--bg); stroke-width: 2; }
+.node text { fill: var(--text); font-size: 18px; }
+.node.skill text { font-size: 15.5px; fill: #c3ccd5; }
+:root[data-theme="light"] .node.skill text { fill: #3d4a56; }
+.node.skill circle { fill: var(--text); }
+.arc { fill: none; stroke-width: 7; stroke-linecap: round; }
+.arc-label { font-size: 21px; font-weight: 700; cursor: pointer; }
+.has-hl .node, .has-hl .arc, .has-hl .arc-label { opacity: var(--dim); }
+.has-hl .edge { stroke-opacity: .04; }
+.has-hl .hl { opacity: 1 !important; }
+.has-hl .edge.hl { stroke-opacity: .95; stroke-width: 2.6; filter: url(#glow); }
+.has-hl .node.skill.hl text { fill: var(--text); font-weight: 600; }
+.node.sel circle { stroke: var(--accent); stroke-width: 4; }
+@media (prefers-reduced-motion: no-preference) {
+  .node, .arc, .arc-label, .edge { transition: opacity .25s, stroke-opacity .25s; }
+}
+
+/* present mode */
+.caption { display: none; }
+body.present .main { grid-template-columns: 1fr; }
+body.present aside, body.present .toolbar, body.present header { display: none; }
+:root[data-theme="light"] button[aria-pressed="true"], :root[data-theme="light"] .caption .steps span.on { color: #fff; }
+body.present .caption { display: block; border-top: 1px solid var(--line); background: var(--panel); padding: 16px 28px 18px; }
+.caption .row { display: flex; align-items: baseline; gap: 16px; }
+.caption h2 { margin: 0; font-size: 30px; }
+.caption .tag { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.caption p { font-size: 20px; margin: 8px 0 0; line-height: 1.4; max-width: 1200px; }
+.caption .steps { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.caption .steps span { font-size: 16px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); }
+.caption .steps span.on { color: #111; background: var(--accent); border-color: var(--accent); font-weight: 600; }
+.caption .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 10px; }
+.caption .card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 17px; }
+@media (min-width: 1100px) { .caption .cards { grid-template-columns: repeat(4, 1fr); } }
+.caption .nav { margin-left: auto; display: flex; gap: 8px; align-items: center; font-size: 15px; color: var(--muted); }
+@media (max-width: 1000px) {
+  .app { height: auto; min-height: 100vh; }
+  .main { display: block; }
+  .graph-wrap { flex: none; height: min(96vw, 85vh); }
+  aside { border-left: none; border-top: 1px solid var(--line); }
+  body.present .app { height: 100vh; }
+  body.present .main { display: grid; grid-template-rows: 1fr; height: 100%; }
+  body.present .graph-wrap { flex: 1; height: auto; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1 id="title">Collective Brain</h1>
+      <div class="sub" id="subtitle"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="controls" role="group" aria-label="View">
+      <button id="btnExplore" aria-pressed="true">Explore</button>
+      <button id="btnDirectory" aria-pressed="false">Directory</button>
+      <a id="btnStory" class="linkbtn" href="motion.html" hidden>▶ Watch the story</a>
+      <button id="btnPresent">Present ▶</button>
+      <button id="btnTheme" title="Toggle light/dark">◐</button>
+    </div>
+  </header>
+  <div class="banner" id="banner" hidden></div>
+  <div class="main">
+    <section class="stage" aria-label="Capability map">
+      <div class="toolbar">
+        <label for="search" class="muted">Search</label>
+        <input id="search" type="search" placeholder="Name, role, skill, country…" autocomplete="off">
+        <button id="btnFact" title="Jump to the next fellow's interesting fact">✦ Fun fact</button>
+        <button id="btnReset">Reset</button>
+      </div>
+      <div class="graph-wrap" id="graphWrap">
+        <svg id="graph" viewBox="-615 -615 1230 1230" role="img" aria-labelledby="graphTitle">
+          <title id="graphTitle">Network of fellows, shared skills and capability clusters</title>
+          <g id="edges"></g><g id="arcs"></g><g id="skills"></g><g id="fellows"></g>
+        </svg>
+        <div class="empty" id="empty" hidden></div>
+        <div class="tip" id="tip" hidden role="tooltip"></div>
+      </div>
+      <div class="directory" id="directory" hidden></div>
+      <div class="caption" id="caption" aria-live="polite"></div>
+    </section>
+    <aside id="panel" aria-live="polite"></aside>
+  </div>
+</div>
+<script src="data.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.BRAIN_DATA || { meta: { counts: { cohort: 32, displayed: 0 }, banner: "No data.js found" }, clusters: [], skills: [], fellows: [], edges: [], scenario: { steps: [] }, examples: [], topClusters: [] };
+const NS = "http://www.w3.org/2000/svg";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const PALETTE = ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F", "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#BAB0AC"];
+const SHORT = {
+  "Enterprise Systems & Digital Transformation": "Enterprise Systems", "Finance, Banking & Payments": "Finance & Payments",
+  "Health & Life Sciences": "Health & Life Sciences", "Engineering, Energy & Manufacturing": "Engineering & Energy",
+  "Operations, Supply Chain & Quality": "Operations & Quality", "Business Growth, Marketing & Media": "Growth & Media",
+  "Programmes, Projects & People": "Programmes & People", "Sustainability & ESG": "Sustainability",
+  "Project & programme management": "Project & programme mgmt", "Business development & sales": "Business dev & sales",
+  "Process & chemical engineering": "Process engineering", "Industrial automation & energy": "Automation & energy",
+  "Marketing & communication": "Marketing & comms",
+};
+const short = (s) => SHORT[s] || s;
+const cluster = Object.fromEntries(D.clusters.map((c, i) => [c.id, { ...c, color: PALETTE[i % PALETTE.length], idx: i }]));
+const fellowById = Object.fromEntries(D.fellows.map((f) => [f.id, f]));
+const skillById = Object.fromEntries(D.skills.map((s) => [s.id, s]));
+const skillEdges = D.edges.filter((e) => e.type === "has-skill");
+const displayName = (f) => f.name || `Fellow ${f.id}`;
+const primary = (f) => (f.clusters && f.clusters[0]) || null;
+const colorOf = (f) => (primary(f) && cluster[primary(f)] ? cluster[primary(f)].color : "#888");
+
+const state = { sel: null, query: "", view: "explore", step: 0 };
+
+// ---------- layout (deterministic) ----------
+const R_F = 372, R_S = 238, R_ARC = 572;
+// Short label for the ring: drop parentheticals; long names → first + last word.
+const ringName = (f) => { const n = displayName(f).replace(/\s*\([^)]*\)\s*/g, " ").trim(); const w = n.split(/\s+/); const s = n.length > 18 && w.length > 2 ? `${w[0]} ${w[w.length - 1]}` : n; return s.length > 20 ? `${w[0]} ${w[w.length - 1][0]}.` : s; };
+const pos = {};
+const arcs = [];
+(function layout() {
+  const order = [...D.fellows].sort((a, b) => {
+    const ca = primary(a) ? cluster[primary(a)].idx : 99, cb = primary(b) ? cluster[primary(b)].idx : 99;
+    return ca - cb || a.id.localeCompare(b.id);
+  });
+  const GAP = 2;
+  const groups = [];
+  for (const f of order) {
+    const k = primary(f) || "_none";
+    if (!groups.length || groups[groups.length - 1].k !== k) groups.push({ k, items: [] });
+    groups[groups.length - 1].items.push(f);
+  }
+  const slots = order.length + GAP * groups.length || 1;
+  const step = (2 * Math.PI) / slots;
+  let s = GAP / 2;
+  for (const g of groups) {
+    const a0 = -Math.PI / 2 + step * (s + 0.5);
+    for (const f of g.items) { pos[f.id] = { a: -Math.PI / 2 + step * (s + 0.5), r: R_F }; s++; }
+    const a1 = -Math.PI / 2 + step * (s - 0.5);
+    if (g.k !== "_none") arcs.push({ id: g.k, a0: a0 - step * 0.35, a1: a1 + step * 0.35 });
+    s += GAP;
+  }
+  // skills: order by circular mean angle of their fellows, then spread evenly
+  const withMean = D.skills.map((sk) => {
+    const fs = skillEdges.filter((e) => e.to === sk.id).map((e) => pos[e.from].a);
+    const x = fs.reduce((t, a) => t + Math.cos(a), 0), y = fs.reduce((t, a) => t + Math.sin(a), 0);
+    let m = Math.atan2(y, x); if (m < -Math.PI / 2) m += 2 * Math.PI;
+    return { id: sk.id, m };
+  }).sort((a, b) => a.m - b.m || a.id.localeCompare(b.id));
+  const n = withMean.length || 1;
+  const start = withMean.length ? withMean[0].m : 0;
+  withMean.forEach((sk, i) => (pos[sk.id] = { a: start + (2 * Math.PI * i) / n, r: R_S }));
+})();
+const xy = (a, r) => [Math.cos(a) * r, Math.sin(a) * r];
+
+// ---------- render ----------
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function radialText(g, label, a, r, outward, cls) {
+  const deg = (a * 180) / Math.PI;
+  const left = Math.cos(a) < 0;
+  const t = el("text", {
+    transform: `rotate(${left ? deg + 180 : deg})`,
+    x: outward ? (left ? -r : r) : (left ? -r : r), y: 0, "dominant-baseline": "middle",
+    "text-anchor": outward ? (left ? "end" : "start") : (left ? "start" : "end"), class: cls || "",
+  }, g);
+  t.textContent = label;
+  return t;
+}
+const nodeEls = {}, edgeEls = [], arcEls = {};
+function render() {
+  const gE = $("edges"), gA = $("arcs"), gS = $("skills"), gF = $("fellows");
+  const defs = el("defs", {}, $("graph"));
+  const flt = el("filter", { id: "glow", x: "-50%", y: "-50%", width: "200%", height: "200%" }, defs);
+  el("feGaussianBlur", { stdDeviation: "3.2", result: "b" }, flt);
+  const mg = el("feMerge", {}, flt); el("feMergeNode", { in: "b" }, mg); el("feMergeNode", { in: "SourceGraphic" }, mg);
+  let ei = 0;
+  for (const e of skillEdges) {
+    const p = pos[e.from], q = pos[e.to];
+    if (!p || !q) continue;
+    const [x1, y1] = xy(p.a, p.r - 10), [x2, y2] = xy(q.a, q.r + 6);
+    const [cx, cy] = xy((p.a + q.a) / 2 + (Math.abs(p.a - q.a) > Math.PI ? Math.PI : 0), (p.r + q.r) / 2 - 40);
+    const path = el("path", { d: `M${x1.toFixed(1)},${y1.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`, class: "edge intro", stroke: colorOf(fellowById[e.from]), pathLength: 1, style: `animation-delay:${(0.4 + (ei++ % 40) * 0.025).toFixed(3)}s` }, gE);
+    path.dataset.from = e.from; path.dataset.to = e.to;
+    edgeEls.push(path);
+  }
+  for (const a of arcs) {
+    const c = cluster[a.id];
+    const [x0, y0] = xy(a.a0, R_ARC), [x1, y1] = xy(a.a1, R_ARC);
+    const large = a.a1 - a.a0 > Math.PI ? 1 : 0;
+    const arc = el("path", { d: `M${x0},${y0} A${R_ARC},${R_ARC} 0 ${large} 1 ${x1},${y1}`, class: "arc", stroke: c.color }, gA);
+    const mid = (a.a0 + a.a1) / 2, bottom = Math.sin(mid) > 0.15;
+    const pad = 0.5, rl = bottom ? R_ARC + 30 : R_ARC + 14;
+    const [lx0, ly0] = xy(a.a0 - pad, rl), [lx1, ly1] = xy(a.a1 + pad, rl);
+    const pid = "lp-" + a.id;
+    el("path", { id: pid, d: bottom ? `M${lx1},${ly1} A${rl},${rl} 0 0 0 ${lx0},${ly0}` : `M${lx0},${ly0} A${rl},${rl} 0 0 1 ${lx1},${ly1}`, fill: "none" }, gA);
+    const t = el("text", { class: "arc-label", fill: c.color, tabindex: 0, role: "button", "aria-label": `Cluster ${c.label}, ${c.count} fellows` }, gA);
+    const tp = el("textPath", { href: "#" + pid, startOffset: "50%", "text-anchor": "middle" }, t);
+    tp.textContent = `${short(c.label)} (${c.count})`;
+    t.addEventListener("click", () => select({ type: "cluster", id: a.id }));
+    t.addEventListener("keydown", (ev) => (ev.key === "Enter" || ev.key === " ") && (ev.preventDefault(), select({ type: "cluster", id: a.id })));
+    arcEls[a.id] = [arc, t];
+  }
+  for (const s of D.skills) {
+    const p = pos[s.id], [x, y] = xy(p.a, p.r);
+    const g = el("g", { class: "node skill", tabindex: 0, role: "button", "aria-label": `Skill ${s.label}, ${s.count} fellows` }, gS);
+    g.classList.add("intro"); g.style.animationDelay = "0.9s";
+    el("circle", { cx: x, cy: y, r: 4 + Math.min(s.count, 8) * 0.9, filter: "url(#glow)" }, g);
+    radialText(g, short(s.label), p.a, p.r - 16, false);
+    el("title", {}, g).textContent = `${s.label}: ${s.count} fellow${s.count === 1 ? "" : "s"}`;
+    bindNode(g, { type: "skill", id: s.id });
+    nodeEls[s.id] = g;
+  }
+  for (const f of D.fellows) {
+    const p = pos[f.id], [x, y] = xy(p.a, p.r);
+    const g = el("g", { class: "node fellow", tabindex: 0, role: "button", "aria-label": `${displayName(f)}${f.role ? ", " + f.role : ""}` }, gF);
+    g.classList.add("intro"); g.style.animationDelay = `${(0.02 * D.fellows.indexOf(f)).toFixed(2)}s`;
+    el("circle", { cx: x, cy: y, r: 10, fill: colorOf(f), filter: "url(#glow)" }, g);
+    radialText(g, ringName(f), p.a, p.r + 17, true);
+    bindNode(g, { type: "fellow", id: f.id });
+    const show = () => showTip(f, g), hide = () => ($("tip").hidden = true);
+    g.addEventListener("mouseenter", show); g.addEventListener("focus", show);
+    g.addEventListener("mouseleave", hide); g.addEventListener("blur", hide);
+    nodeEls[f.id] = g;
+  }
+  if (!D.fellows.length) {
+    $("empty").hidden = false;
+    $("empty").innerHTML = `No approved profiles to show yet.<br>${D.meta.counts.displayed} of ${D.meta.counts.cohort} fellows have approved display for this audience.`;
+  }
+}
+function showTip(f, g) {
+  const tip = $("tip"), wrap = $("graphWrap").getBoundingClientRect(), r = g.querySelector("circle").getBoundingClientRect();
+  tip.innerHTML = `<strong>${esc(displayName(f))}</strong>${f.role ? `<br><span class="muted">${esc(f.role)}${f.org ? `, ${esc(f.org)}` : ""}</span>` : ""}${f.beyond_cv ? `<div class="fact">✦ ${esc(f.beyond_cv)}</div>` : ""}`;
+  tip.hidden = false;
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = r.left - wrap.left + r.width / 2 + 14, y = r.top - wrap.top - th / 2;
+  if (x + tw > wrap.width - 8) x = r.left - wrap.left - tw - 14;
+  tip.style.left = Math.max(8, x) + "px";
+  tip.style.top = Math.max(8, Math.min(wrap.height - th - 8, y)) + "px";
+}
+function bindNode(g, ref) {
+  g.addEventListener("click", () => select(ref));
+  g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(ref); } });
+}
+
+// ---------- highlight ----------
+function neighbours(ref) {
+  const set = new Set([ref.id]);
+  if (ref.type === "fellow") {
+    const f = fellowById[ref.id];
+    (f.skills || []).forEach((s) => set.add(s));
+    (f.clusters || []).forEach((c) => set.add("c:" + c));
+  } else if (ref.type === "skill") {
+    skillEdges.filter((e) => e.to === ref.id).forEach((e) => set.add(e.from));
+  } else if (ref.type === "cluster") {
+    set.add("c:" + ref.id);
+    D.fellows.filter((f) => f.clusters?.includes(ref.id)).forEach((f) => { set.add(f.id); (f.skills || []).forEach((s) => set.add(s)); });
+  }
+  return set;
+}
+function applyHighlight(set, selId) {
+  const svg = $("graph");
+  svg.classList.toggle("has-hl", !!set);
+  for (const [id, g] of Object.entries(nodeEls)) { g.classList.toggle("hl", !!set && set.has(id)); g.classList.toggle("sel", id === selId); }
+  for (const p of edgeEls) p.classList.toggle("hl", !!set && set.has(p.dataset.from) && set.has(p.dataset.to));
+  for (const [id, els] of Object.entries(arcEls)) els.forEach((e) => e.classList.toggle("hl", !!set && (set.has("c:" + id))));
+}
+function matches(f, q) {
+  const hay = [f.name, f.role, f.org, f.country, ...(f.skills || []), ...(f.capabilities || []), ...(f.clusters || []).map((c) => cluster[c]?.label)].join(" ").toLowerCase();
+  return q.split(/\s+/).every((w) => hay.includes(w));
+}
+function refresh() {
+  if (state.view === "present") return;
+  let set = null;
+  if (state.sel) set = neighbours(state.sel);
+  else if (state.query) {
+    set = new Set();
+    for (const f of D.fellows) if (matches(f, state.query)) { set.add(f.id); (f.skills || []).forEach((s) => set.add(s)); (f.clusters || []).forEach((c) => set.add("c:" + c)); }
+    for (const s of D.skills) if (s.label.toLowerCase().includes(state.query)) set.add(s.id);
+  }
+  applyHighlight(set, state.sel?.id);
+  renderPanel();
+  if (state.view === "directory") renderDirectory();
+}
+function select(ref) {
+  if (state.view === "present") return;
+  state.sel = state.sel && state.sel.id === ref.id ? null : ref;
+  refresh();
+}
+
+// ---------- side panel ----------
+function chipsFor(list, type) {
+  return `<div class="chips">${list.map((id) => {
+    if (type === "cluster") { const c = cluster[id]; return c ? `<button class="chip" data-type="cluster" data-id="${esc(id)}"><span class="swatch" style="background:${c.color}"></span>${esc(c.label)}</button>` : ""; }
+    return `<button class="chip" data-type="${type}" data-id="${esc(id)}">${esc(type === "fellow" ? displayName(fellowById[id]) : id)}</button>`;
+  }).join("")}</div>`;
+}
+function renderPanel() {
+  const P = $("panel"), m = D.meta, c = m.counts;
+  let h = "";
+  if (!state.sel) {
+    h += `<h2>${esc(m.subtitle || "What we offer")}</h2>`;
+    h += `<div class="stats"><div><div class="stat">${c.displayed}</div><small>profiles shown, of ${c.cohort} fellows</small></div><div><div class="stat">${c.countries}</div><small>countries among shown profiles</small></div><div><div class="stat">${D.skills.length}</div><small>shared skill areas</small></div><div><div class="stat">${D.clusters.filter((x) => x.count).length}</div><small>capability clusters</small></div></div>`;
+    if (c.respondents != null && c.respondents !== c.displayed) h += `<p class="muted">Source coverage: ${c.respondents} of ${c.cohort} fellows have submitted a profile.</p>`;
+    h += `<h3>Clusters</h3><ul class="legend">${D.clusters.map((x) => `<li><button data-type="cluster" data-id="${esc(x.id)}" ${x.count ? "" : "disabled"}><span><span class="swatch" style="background:${cluster[x.id].color}"></span>${esc(x.label)}</span><span class="muted">${x.count}</span></button></li>`).join("")}</ul>`;
+    h += `<p class="muted" style="margin-top:14px">Click a fellow, skill or cluster to see the connections. A fellow can belong to more than one cluster. Every fellow node is the same size, so nothing here ranks people.</p>`;
+  } else if (state.sel.type === "fellow") {
+    const f = fellowById[state.sel.id];
+    h += `<h2>${esc(displayName(f))}</h2>`;
+    if (f.role) h += `<p><strong>${esc(f.role)}</strong>${f.org ? `, ${esc(f.org)}` : ""}</p>`;
+    if (f.country) h += `<p class="muted">From ${esc(f.country)}</p>`;
+    if (f.clusters?.length) h += `<h3>Clusters</h3>${chipsFor(f.clusters, "cluster")}`;
+    if (f.skills?.length) h += `<h3>Shared skills</h3>${chipsFor(f.skills, "skill")}`;
+    if (f.capabilities?.length) h += `<h3>What they bring</h3><ul>${f.capabilities.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
+    if (f.example) h += `<h3>Example</h3><p>${esc(f.example)}</p>`;
+    if (f.beyond_cv) h += `<h3>✦ Interesting fact</h3><p class="factbox">${esc(f.beyond_cv)}</p>`;
+    const peers = new Map();
+    for (const s of f.skills || []) for (const e of skillEdges) if (e.to === s && e.from !== f.id) peers.set(e.from, [...(peers.get(e.from) || []), s]);
+    if (peers.size) h += `<h3>Shares skills with</h3><ul>${[...peers].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0])).map(([id, ss]) => `<li><button class="chip" data-type="fellow" data-id="${esc(id)}">${esc(displayName(fellowById[id]))}</button> <span class="muted">${esc(ss.join(", "))}</span></li>`).join("")}</ul>`;
+  } else if (state.sel.type === "skill") {
+    const s = skillById[state.sel.id];
+    const fs = skillEdges.filter((e) => e.to === s.id);
+    h += `<h2>${esc(s.label)}</h2><p class="muted">${fs.length} of ${c.displayed} shown profiles</p>`;
+    h += `<h3>Why these fellows are connected</h3><ul>${fs.map((e) => `<li><button class="chip" data-type="fellow" data-id="${esc(e.from)}">${esc(displayName(fellowById[e.from]))}</button><br><span class="muted">${esc(e.why)}</span></li>`).join("")}</ul>`;
+  } else if (state.sel.type === "cluster") {
+    const cl = cluster[state.sel.id];
+    const fs = D.fellows.filter((f) => f.clusters?.includes(cl.id));
+    const sk = [...new Set(fs.flatMap((f) => f.skills || []))].sort();
+    h += `<h2><span class="swatch" style="background:${cl.color}"></span>${esc(cl.label)}</h2><p class="muted">${fs.length} of ${c.displayed} shown profiles</p>`;
+    h += `<h3>Fellows</h3>${chipsFor(fs.map((f) => f.id), "fellow")}<h3>Skills in this cluster</h3>${chipsFor(sk, "skill")}`;
+  }
+  if (state.sel) h = `<button id="back" style="margin-bottom:8px">← Overview</button>` + h;
+  P.innerHTML = h;
+  P.querySelectorAll("[data-type]").forEach((b) => b.addEventListener("click", () => { state.sel = { type: b.dataset.type, id: b.dataset.id }; refresh(); }));
+  const back = $("back"); if (back) back.addEventListener("click", () => { state.sel = null; refresh(); });
+}
+
+// ---------- directory ----------
+function renderDirectory() {
+  const rows = D.fellows.filter((f) => !state.query || matches(f, state.query));
+  $("directory").innerHTML = rows.length ? `<table><caption class="muted" style="text-align:left;padding:4px 0 10px">${rows.length} of ${D.fellows.length} shown profiles</caption><thead><tr><th scope="col">Name</th><th scope="col">Role</th><th scope="col">Country</th><th scope="col">Clusters</th><th scope="col">Shared skills</th></tr></thead><tbody>${rows.map((f) => `<tr><td><button data-id="${esc(f.id)}">${esc(displayName(f))}</button></td><td>${esc(f.role || "")}${f.org ? `<br><span class="muted">${esc(f.org)}</span>` : ""}</td><td>${esc(f.country || "")}</td><td>${(f.clusters || []).map((c) => `<span class="swatch" style="background:${cluster[c].color}"></span>${esc(cluster[c].label)}`).join("<br>")}</td><td>${esc((f.skills || []).join(", "))}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">No profiles match “${esc(state.query)}”.</p>`;
+  $("directory").querySelectorAll("button[data-id]").forEach((b) => b.addEventListener("click", () => { state.sel = { type: "fellow", id: b.dataset.id }; refresh(); }));
+}
+function setView(v) {
+  state.view = v;
+  $("btnExplore").setAttribute("aria-pressed", v === "explore");
+  $("btnDirectory").setAttribute("aria-pressed", v === "directory");
+  $("graphWrap").hidden = v === "directory";
+  $("directory").hidden = v !== "directory";
+  refresh();
+}
+
+// ---------- present mode ----------
+function buildSteps() {
+  const c = D.meta.counts, all = null;
+  const steps = [];
+  steps.push({ tag: "Who we are", title: D.meta.title || "32 Minds. One Collective Impact.", text: c.displayed ? `${c.displayed} profiles from ${c.countries} countries, connected by ${D.skills.length} shared skill areas.${c.displayed < c.cohort ? ` This shows ${c.displayed} of our ${c.cohort} fellows.` : ""}` : `Our ${c.cohort} fellows. Profiles will appear here once each fellow approves their display.`, hl: all });
+  for (const id of D.topClusters) {
+    const cl = cluster[id];
+    steps.push({ tag: "Where our strengths cluster", title: cl.label, text: `${cl.count} of ${c.displayed} shown profiles bring experience in ${cl.label}.`, hl: neighbours({ type: "cluster", id }) });
+  }
+  if (D.examples.length) {
+    const set = new Set(); D.examples.forEach((id) => neighbours({ type: "fellow", id }).forEach((x) => set.add(x)));
+    steps.push({ tag: "In practice", title: "What that looks like", cards: D.examples.map((id) => fellowById[id]), hl: set });
+  }
+  const factPicks = factFellows().slice(0, 4);
+  if (factPicks.length) {
+    const set = new Set(factPicks.map((f) => f.id));
+    steps.push({ tag: "Beyond the CV", title: "The people behind the profiles", facts: factPicks, hl: set });
+  }
+  const sc = D.scenario;
+  const acc = new Set();
+  sc.steps.forEach((s, i) => {
+    s.fellows.forEach((id) => acc.add(id)); s.skills.forEach((k) => acc.add(k));
+    const set = new Set(); s.fellows.forEach((id) => { set.add(id); }); s.skills.forEach((k) => set.add(k));
+    steps.push({ tag: "Illustrative challenge", title: s.label, scenario: i, text: `Challenge: ${sc.title.replace(/^Illustrative challenge: /, "")}. In this step, ${s.fellows.length} shown profiles bring ${s.skills.join(", ") || "these skills"}.`, hl: set });
+  });
+  steps.push({ tag: "What we can achieve together", title: "Bring us your challenge.", text: "Every connection here can become a collaboration. Which of your challenges should we take on together?", hl: all });
+  return steps;
+}
+// Facts spread across clusters: first suitable fact per cluster, in cluster order (deterministic).
+function factFellows() {
+  const seen = new Set(), out = [];
+  const ok = (f) => f.beyond_cv && f.beyond_cv.length >= 25 && f.beyond_cv.length <= 140;
+  for (const c of D.clusters) for (const f of D.fellows) if (!seen.has(c.id) && primary(f) === c.id && ok(f)) { seen.add(c.id); out.push(f); }
+  return out;
+}
+let STEPS = [];
+function showStep(i) {
+  STEPS = STEPS.length ? STEPS : buildSteps();
+  state.step = Math.max(0, Math.min(STEPS.length - 1, i));
+  const s = STEPS[state.step];
+  applyHighlight(s.hl, null);
+  let h = `<div class="row"><span class="tag">${esc(s.tag)}</span><div class="nav"><span>${state.step + 1} / ${STEPS.length}</span><button id="pPrev" aria-label="Previous">◀</button><button id="pNext" aria-label="Next">▶</button><button id="pExit">Exit</button></div></div><h2>${esc(s.title)}</h2>`;
+  if (s.text) h += `<p>${esc(s.text)}</p>`;
+  if (s.scenario != null) h += `<div class="steps">${D.scenario.steps.map((x, j) => `<span class="${j === s.scenario ? "on" : ""}">${j + 1}. ${esc(x.label)}</span>`).join("")}</div>`;
+  if (s.cards) h += `<div class="cards">${s.cards.map((f) => `<div class="card"><strong>${esc(displayName(f))}</strong>${f.role ? `, ${esc(f.role)}` : ""}<br>${esc(f.example)}</div>`).join("")}</div>`;
+  if (s.facts) h += `<div class="cards">${s.facts.map((f) => `<div class="card"><strong>${esc(displayName(f))}</strong>${f.role ? `<br><span class="muted">${esc(f.role)}</span>` : ""}<span class="fact">✦ ${esc(f.beyond_cv)}</span></div>`).join("")}</div>`;
+  $("caption").innerHTML = h;
+  $("pPrev").onclick = () => showStep(state.step - 1);
+  $("pNext").onclick = () => showStep(state.step + 1);
+  $("pExit").onclick = exitPresent;
+}
+function enterPresent() {
+  state.view = "present"; state.sel = null; $("tip").hidden = true;
+  document.body.classList.add("present");
+  $("graphWrap").hidden = false; $("directory").hidden = true;
+  showStep(0);
+}
+function exitPresent() {
+  document.body.classList.remove("present");
+  if (document.fullscreenElement) document.exitFullscreen();
+  setView("explore");
+}
+
+// ---------- wiring ----------
+function init() {
+  const m = D.meta;
+  $("title").textContent = m.title || "Collective Brain";
+  $("subtitle").textContent = (m.subtitle || "") + (m.mode === "release" ? " · Internal: for AFRIKA KOMMT! partner companies" : "");
+  $("btnStory").hidden = m.mode !== "release"; // the story page is only built alongside the release data
+  if (m.banner) { const b = $("banner"); b.hidden = false; b.textContent = m.banner; b.classList.toggle("fixture", m.mode === "fixture"); }
+  try { const t = localStorage.getItem("ak15-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+  render();
+  $("search").addEventListener("input", (e) => { state.query = e.target.value.trim().toLowerCase(); state.sel = null; refresh(); });
+  $("btnReset").addEventListener("click", () => { state.sel = null; state.query = ""; $("search").value = ""; refresh(); });
+  const withFacts = D.fellows.filter((f) => f.beyond_cv);
+  let factIdx = -1;
+  $("btnFact").hidden = !withFacts.length;
+  $("btnFact").addEventListener("click", () => {
+    factIdx = (factIdx + 1) % withFacts.length;
+    const f = withFacts[factIdx];
+    if (state.view !== "explore") setView("explore");
+    state.sel = { type: "fellow", id: f.id }; state.query = ""; $("search").value = "";
+    refresh();
+    showTip(f, nodeEls[f.id]);
+  });
+  // drop intro-animation classes once done so highlight/dim styles apply
+  document.querySelectorAll(".intro").forEach((n) => n.addEventListener("animationend", () => n.classList.remove("intro"), { once: true }));
+  $("btnExplore").addEventListener("click", () => setView("explore"));
+  $("btnDirectory").addEventListener("click", () => setView("directory"));
+  $("btnPresent").addEventListener("click", enterPresent);
+  $("btnTheme").addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("ak15-theme", next); } catch {}
+  });
+  document.addEventListener("keydown", (e) => {
+    if (state.view === "present") {
+      if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); showStep(state.step + 1); }
+      else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); showStep(state.step - 1); }
+      else if (e.key === "Home" || e.key.toLowerCase() === "r") showStep(0);
+      else if (e.key.toLowerCase() === "f") { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); }
+      else if (e.key === "Escape") exitPresent();
+    } else if (e.key === "Escape") { state.sel = null; refresh(); }
+  });
+  refresh();
+}
+init();
+})();
+</script>
+</body>
+</html>

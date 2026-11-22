@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ak15-release",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve.mjs", "release", "8015"],
+      "port": 8015
+    },
+    {
+      "name": "ak15-fixture",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve.mjs", "dist", "8016"],
+      "port": 8016
+    }
+  ]
+}

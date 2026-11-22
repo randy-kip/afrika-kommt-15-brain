@@ -1,0 +1,30 @@
+// Shared skill taxonomy v0.1 used by build-vault.mjs and export.mjs.
+export const TAXONOMY_VERSION = "0.1";
+export const CANON = [
+  ["Data engineering", /data engineering|pipelines|data migration|etl/i],
+  ["Machine learning & AI", /machine learning|\bml\b|\bai\b|llm|nlp|chatbot|generative|\brag\b/i],
+  ["Analytics & BI", /analytics|power bi|\bbi\b|dashboards|kpi|data tooling|data team/i],
+  ["Software development", /software|full-stack|mobile development|web/i],
+  ["Cloud & DevOps", /cloud-native|cloud infrastructure|cloud migration|azure|aws|devops|kubernetes|infrastructure-as-code/i],
+  ["ERP & SAP systems", /sap|erp|oracle fusion|s\/4hana|abap/i],
+  ["Digital transformation", /transformation|technology adoption|change management|process optimis/i],
+  ["Product management", /product (management|manager|design|development)|0→1/i],
+  ["Project & programme management", /project|programme|rollout delivery|pmp|agile|scrum/i],
+  ["Payments & fintech", /payment|fintech|digital financial/i],
+  ["Banking & trade finance", /banking|trade finance|credit|kyc|client acquisition/i],
+  ["Business development & sales", /business development|sales|presales|lead generation|market prospecting|export|negotiation/i],
+  ["Marketing & communication", /marketing|brand|communication|content|editorial|audience|media/i],
+  ["Public health", /public health|health policy|health economics|health systems|health education/i],
+  ["Pharmacy & drug safety", /pharmac|drug safety|vaccin/i],
+  ["Clinical research", /clinical trials|clinical research/i],
+  ["Regulatory & compliance", /regulatory|compliance|gmp|gcp|\biso\b|haccp|audit/i],
+  ["Quality management", /quality (improvement|management|assurance)|\bqa\b|lean six sigma/i],
+  ["Process & chemical engineering", /process engineering|\bcfd\b|multiphase|chemical|plant reliability/i],
+  ["Industrial automation & energy", /automation \(plc|industrial automation|energy|electronics|embedded/i],
+  ["Supply chain & logistics", /supply chain|logistics|procurement|sourcing|inventory|customs/i],
+  ["Sustainability & ESG", /esg|sustainab|climate|decarbon|environmental/i],
+  ["People & talent", /talent|people analytics|performance management|\bdei\b|mentoring/i],
+  ["Monitoring & evaluation", /m&e|monitoring & evaluation|monitoring and evaluation/i],
+  ["Multilingual", /multilingual:|translation|german b1/i],
+];
+export const canonOf = (f) => [...new Set(f.capabilities.flatMap((c) => CANON.filter(([, re]) => re.test(c)).map(([n]) => n)))].sort();

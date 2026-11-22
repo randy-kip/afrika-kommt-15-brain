@@ -1,0 +1,8 @@
+# Fellow data never goes in this repo (it is public). See README → "Data and hosting".
+restricted/
+release/
+# helper scripts that embed fellow names, facts or profile links
+scripts/apply-facts.mjs
+scripts/li-round-*.mjs
+node_modules/
+.DS_Store
