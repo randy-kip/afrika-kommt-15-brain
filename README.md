@@ -9,7 +9,7 @@ An interactive capability map of the AFRIKA KOMMT! 15 cohort for the "What we of
 | `app/` | The app source (`index.html` map, `motion.html` story, `africa.js` shapes + flags) | yes |
 | `scripts/` | Import, export, vault and test scripts | yes |
 | `dist/` | App + **fictional** data, for rehearsal and layout | yes |
-| `release/` | App + **only fellow-approved** data | only for the approved audience |
+| `release/` | App + **only fellow-approved** data (committed; repo is private) | only for the approved audience |
 | `restricted/` | Fellow data, raw LinkedIn text, audit, draft preview, approvals, Obsidian vault | **no**: never commit, sync or email |
 
 ## Commands (Node 18+)
@@ -50,7 +50,7 @@ Each export validates its own output: no dangling edges, no fields outside the a
 
 ## Data and hosting
 
-This repository is **public**, so it holds the code and the fictional `dist/` data only. `.gitignore` keeps out `restricted/`, `release/` and the helper scripts that embed fellow names, facts or profile links.
+This repository is **private**. It holds the code, the fictional `dist/` data, and `release/`: the approved build, the same three files the Claude artifact serves. `.gitignore` keeps out `restricted/` (raw sources, CVs, LinkedIn text, the audit, approvals) and the helper scripts that embed fellow names, facts or profile links.
 
 The page people see has three files, built locally from the approved data:
 

@@ -1,6 +1,6 @@
-# Fellow data never goes in this repo (it is public). See README → "Data and hosting".
+# The repo is private. release/ (the approved build, same files as the Claude artifact) is committed;
+# raw sources, CVs, LinkedIn text, the audit and approvals in restricted/ stay on the local machine.
 restricted/
-release/
 # helper scripts that embed fellow names, facts or profile links
 scripts/apply-facts.mjs
 scripts/li-round-*.mjs
