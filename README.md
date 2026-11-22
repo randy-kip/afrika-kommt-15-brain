@@ -9,7 +9,7 @@ An interactive capability map of the AFRIKA KOMMT! 15 cohort for the "What we of
 | `app/` | The app source (`index.html` map, `motion.html` story, `africa.js` shapes + flags) | yes |
 | `scripts/` | Import, export, vault and test scripts | yes |
 | `dist/` | App + **fictional** data, for rehearsal and layout | yes |
-| `release/` | App + **only fellow-approved** data (committed; repo is private) | only for the approved audience |
+| `release/` | App + **only fellow-approved** data (committed; public while hosted on GitHub Pages) | only for the approved audience |
 | `restricted/` | Fellow data, raw LinkedIn text, audit, draft preview, approvals, Obsidian vault | **no**: never commit, sync or email |
 
 ## Commands (Node 18+)
@@ -50,7 +50,7 @@ Each export validates its own output: no dangling edges, no fields outside the a
 
 ## Data and hosting
 
-This repository is **private**. It holds the code, the fictional `dist/` data, and `release/`: the approved build, the same three files the Claude artifact serves. `.gitignore` keeps out `restricted/` (raw sources, CVs, LinkedIn text, the audit, approvals) and the helper scripts that embed fellow names, facts or profile links.
+This repository is **public for now** (temporary, until the site moves to a host with a login). It holds the code, the fictional `dist/` data, and `release/`: the approved build, the same three files the Claude artifact serves. `.gitignore` keeps out `restricted/` (raw sources, CVs, LinkedIn text, the audit, approvals) and the helper scripts that embed fellow names, facts or profile links.
 
 The page people see has three files, built locally from the approved data:
 
@@ -63,7 +63,9 @@ node scripts/build-motion.mjs     # release/motion.html (the Africa-map story)
 - `release/motion.html`: the scroll story, with "← Back to map" linking to `index.html`
 - `release/data.js`: the approved fellow data, the only file with personal data
 
-To host, upload `release/` as a static site (it needs no build step on the host), or point a host at a **private** copy that contains `release/data.js`. Put the site behind a login (for example Cloudflare Access) when partners outside the team use it.
+**Current hosting:** GitHub Pages deploys `release/` on every push to `main` (`.github/workflows/pages.yml`), with every page marked `noindex`. The site is open to anyone who has the link.
+
+To move hosting, upload `release/` as a static site (it needs no build step on the host), or point a host at a **private** copy that contains `release/data.js`. Put the site behind a login (for example Cloudflare Access) when partners outside the team use it.
 
 `node scripts/build-artifact.mjs` packs `release/` into the single-file Claude artifact (`restricted/artifacts/brain-v1.html`), published with `motion.html` and `data.js` beside it.
 

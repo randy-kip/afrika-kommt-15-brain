@@ -1,0 +1,38 @@
+# Publishes release/ (the map, the Africa-map story and the approved data) to GitHub Pages.
+# Temporary hosting: the site is public at its link, so every page is marked noindex.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ask search engines not to index the pages
+        run: |
+          for f in release/*.html; do
+            grep -q 'name="robots"' "$f" || sed -i 's#<head>#<head>\n<meta name="robots" content="noindex, nofollow">#' "$f"
+          done
+          grep -c 'name="robots"' release/*.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: release
+      - id: deployment
+        uses: actions/deploy-pages@v4
