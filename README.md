@@ -57,6 +57,8 @@ The page people see has three files, built locally from the approved data:
 ```bash
 node scripts/export.mjs release   # release/index.html + release/data.js
 node scripts/build-motion.mjs     # release/motion.html, daph/, offer/, baobab/, africa.js
+node scripts/import-photos.mjs <folder>   # fellows' form photos -> release/deck/photos/Fxx.jpg (ffmpeg)
+node scripts/build-deck.mjs       # release/deck/ (full presentation) + release/hub/ (links to every page)
 ```
 
 - `release/index.html`: the capability map, with "▶ Watch the story" linking to `motion.html`

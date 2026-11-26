@@ -516,6 +516,13 @@ window.BRAIN_DATA = {
   },
   {
    "from": "F17",
+   "id": "F17|skill|Analytics & BI",
+   "to": "Analytics & BI",
+   "type": "has-skill",
+   "why": "Vivian Okeyo's profile lists experience in Analytics & BI."
+  },
+  {
+   "from": "F17",
    "id": "F17|skill|Data engineering",
    "to": "Data engineering",
    "type": "has-skill",
@@ -534,6 +541,13 @@ window.BRAIN_DATA = {
    "to": "ERP & SAP systems",
    "type": "has-skill",
    "why": "Vivian Okeyo's profile lists experience in ERP & SAP systems."
+  },
+  {
+   "from": "F17",
+   "id": "F17|skill|Quality management",
+   "to": "Quality management",
+   "type": "has-skill",
+   "why": "Vivian Okeyo's profile lists experience in Quality management."
   },
   {
    "from": "F17",
@@ -1013,6 +1027,13 @@ window.BRAIN_DATA = {
   },
   {
    "from": "F32",
+   "id": "F32|skill|Analytics & BI",
+   "to": "Analytics & BI",
+   "type": "has-skill",
+   "why": "Agnes Talai's profile lists experience in Analytics & BI."
+  },
+  {
+   "from": "F32",
    "id": "F32|skill|Digital transformation",
    "to": "Digital transformation",
    "type": "has-skill",
@@ -1031,6 +1052,13 @@ window.BRAIN_DATA = {
    "to": "Project & programme management",
    "type": "has-skill",
    "why": "Agnes Talai's profile lists experience in Project & programme management."
+  },
+  {
+   "from": "F32",
+   "id": "F32|skill|Regulatory & compliance",
+   "to": "Regulatory & compliance",
+   "type": "has-skill",
+   "why": "Agnes Talai's profile lists experience in Regulatory & compliance."
   },
   {
    "from": "F32",
@@ -1434,11 +1462,13 @@ window.BRAIN_DATA = {
   {
    "beyond_cv": "If I'm not learning, I'm serving.",
    "capabilities": [
+    "Digital transformation strategy & roadmaps",
     "Oracle Fusion ERP implementation",
-    "Process optimisation",
-    "Digital transformation roadmaps",
-    "Data migration assurance",
-    "Customer experience"
+    "Business process re-engineering",
+    "Quality assurance & data migration assurance",
+    "Change management & user adoption",
+    "Data analysis & visualisation (Power BI)",
+    "Customer experience & journey mapping"
    ],
    "clusters": [
     "enterprise-transformation",
@@ -1450,9 +1480,11 @@ window.BRAIN_DATA = {
    "org": "KPMG East Africa",
    "role": "Senior Associate, Technology & Innovation",
    "skills": [
+    "Analytics & BI",
     "Data engineering",
     "Digital transformation",
-    "ERP & SAP systems"
+    "ERP & SAP systems",
+    "Quality management"
    ]
   },
   {
@@ -1782,12 +1814,14 @@ window.BRAIN_DATA = {
   },
   {
    "capabilities": [
-    "Business & corporate strategy",
-    "Retail AI start-up founder",
+    "Business, corporate & go-to-market strategy",
+    "Market entry & expansion analysis",
+    "Sustainability strategy & climate finance",
     "Programme & project management",
-    "Decarbonisation & climate strategy",
-    "Digital transformation",
-    "Information security risk assessment"
+    "KPI frameworks & performance dashboards",
+    "Operating model & transformation roadmaps",
+    "Regulatory, ESG & supply-chain compliance",
+    "Retail AI start-up founder"
    ],
    "clusters": [
     "sustainability",
@@ -1798,11 +1832,13 @@ window.BRAIN_DATA = {
    "id": "F32",
    "name": "Agnes Talai",
    "org": "SmartShelf AI",
-   "role": "Founder & Managing Director (formerly Manager, Strategy & Operations at PwC East Africa)",
+   "role": "Independent Strategy & Transformation Consultant; Founder, SmartShelf AI (formerly Regional Strategy & Operations Manager, PwC Eastern Africa)",
    "skills": [
+    "Analytics & BI",
     "Digital transformation",
     "Machine learning & AI",
     "Project & programme management",
+    "Regulatory & compliance",
     "Sustainability & ESG"
    ]
   }
@@ -1901,6 +1937,7 @@ window.BRAIN_DATA = {
      "F08",
      "F12",
      "F14",
+     "F17",
      "F18",
      "F19",
      "F22",
@@ -1933,7 +1970,7 @@ window.BRAIN_DATA = {
    "label": "Machine learning & AI"
   },
   {
-   "count": 6,
+   "count": 8,
    "id": "Analytics & BI",
    "label": "Analytics & BI"
   },
@@ -2003,12 +2040,12 @@ window.BRAIN_DATA = {
    "label": "Clinical research"
   },
   {
-   "count": 5,
+   "count": 6,
    "id": "Regulatory & compliance",
    "label": "Regulatory & compliance"
   },
   {
-   "count": 4,
+   "count": 5,
    "id": "Quality management",
    "label": "Quality management"
   },
