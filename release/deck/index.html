@@ -141,7 +141,7 @@ svg.map .lab { font: 700 22px var(--head); fill: var(--ink); }
 .fcard .fact.ser i { background: var(--green-soft); color: var(--green); }
 .fcard .stand { position: absolute; bottom: 16px; left: 0; right: 0; text-align: center; font: 800 15px var(--head); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); opacity: 0; transition: opacity .5s .9s; }
 .fcard.on .stand { opacity: 1; }
-.fcard.compact { padding: 26px 26px 22px; }
+.fcard.compact { padding: 26px 26px 56px; min-height: 580px; }
 .fcard.compact .ph { width: 140px; height: 140px; margin-bottom: 16px; }
 .fcard.compact h3 { font-size: 36px; }
 .fcard.compact .role { font-size: 17px; min-height: 46px; margin: 8px 0 10px; }
@@ -578,7 +578,7 @@ ROUNDS.forEach((R, ri) => {
           ${ch.map((f, i) => `<div class="fcard ${compact ? "compact" : ""}" data-s="${one ? i + 1 : 1}" data-fx="pop" style="--d:${one ? 0 : i * 0.18}s">
             <span class="stand">Please stand</span>
             <div class="ph">${photo(f)}</div><h3>${esc(f.short)}</h3>
-            <div class="role">${esc(f.role)}${f.org && !/^\(/.test(f.org) ? ` · ${esc(f.org)}` : ""}</div>
+            <div class="role">${esc(f.role.replace(/s*(formerly[^)]*)/, "").replace(/;.*$/, ""))}${f.org && !/^\(/.test(f.org) ? ` · ${esc(f.org)}` : ""}</div>
             ${f.serious ? `<div class="fact ser"><i>▲</i><span>${esc(f.serious)}</span></div>` : ""}
             ${f.fun ? `<div class="fact fun"><i>✦</i><span>${esc(f.fun)}</span></div>` : ""}
           </div>`).join("")}
