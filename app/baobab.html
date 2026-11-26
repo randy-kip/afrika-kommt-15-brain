@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Our Baobab</title>
+<!-- Motion story for the AK!15 kick-off: one baobab grows through the presentation's chapters, from the intro's
+     "Tree of Life" and Hannah's "From Seed to Baobab" to the 32 fruits. Canvas 2D, no libraries.
+     Reads ../data.js (fellows, areas) and ../africa.js (flags). Keys: ← → space, F fullscreen, P autoplay. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root { --green: #2d6a39; --green-2: #1f4d29; --cream: #faf7f0; --ink: #1d2a1f; --font: "Montserrat", "Segoe UI", system-ui, Arial, sans-serif; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #1b2a3a; font-family: var(--font); color: #fff; }
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.panel { position: fixed; left: clamp(16px, 5vw, 80px); top: 50%; transform: translateY(-50%); width: min(440px, 38vw); pointer-events: none; }
+.card { pointer-events: auto; background: rgba(20, 38, 25, .58); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 18px; padding: 26px 28px; transition: opacity .55s ease, transform .55s ease; }
+.card.out { opacity: 0; transform: translateY(14px); }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #ffd97a; margin: 0 0 10px; }
+h1 { font-size: clamp(26px, 3.1vw, 44px); line-height: 1.08; font-weight: 900; margin: 0 0 14px; }
+.body { font-size: clamp(15px, 1.25vw, 18px); line-height: 1.6; font-weight: 500; margin: 0; color: rgba(255, 255, 255, .92); }
+.stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.stat { background: rgba(255, 255, 255, .1); border-radius: 12px; padding: 10px 14px; min-width: 110px; }
+.stat b { display: block; font-size: 30px; font-weight: 900; color: #ffd97a; line-height: 1.1; }
+.stat span { font-size: 12.5px; font-weight: 600; opacity: .9; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 16px; }
+.chip { font-size: 12.5px; font-weight: 600; background: rgba(255, 255, 255, .1); border-radius: 999px; padding: 5px 10px 5px 8px; display: inline-flex; align-items: center; gap: 6px; }
+.chip i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.links a { color: var(--ink); background: #ffd97a; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 999px; padding: 9px 16px; }
+.links a.ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255, 255, 255, .6); }
+.foot { font-size: 11px; opacity: .6; margin-top: 14px; }
+.dots { position: fixed; right: clamp(12px, 2.5vw, 34px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; }
+.dots button { width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .8); background: transparent; padding: 0; cursor: pointer; transition: transform .2s, background .2s; }
+.dots button.on { background: #ffd97a; border-color: #ffd97a; transform: scale(1.35); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 10px; padding: 14px; pointer-events: none; }
+.bar button { pointer-events: auto; font: 700 14px var(--font); color: #fff; background: rgba(20, 38, 25, .6); border: 1.5px solid rgba(255, 255, 255, .35); border-radius: 999px; padding: 9px 18px; cursor: pointer; backdrop-filter: blur(6px); }
+.bar button:hover { border-color: #fff; }
+.bar button.go { background: #ffd97a; color: var(--ink); border-color: #ffd97a; }
+.tip { position: fixed; pointer-events: none; background: #fff; color: var(--ink); border-radius: 12px; padding: 10px 13px; font-size: 13px; line-height: 1.4; box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
+  max-width: 260px; opacity: 0; transition: opacity .15s; z-index: 5; }
+.tip b { display: block; font-size: 14.5px; }
+.tip .a { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; margin-top: 4px; }
+.tip .a i { width: 9px; height: 9px; border-radius: 50%; }
+.tip img { width: 20px; height: 15px; border-radius: 2px; vertical-align: -2px; margin-right: 5px; }
+.back { position: fixed; left: 16px; top: 14px; color: #fff; opacity: .75; font-size: 13px; font-weight: 600; text-decoration: none; }
+.back:hover { opacity: 1; }
+@media (max-width: 760px) {
+  .panel { left: 12px; right: 12px; top: auto; bottom: 64px; transform: none; width: auto; }
+  .card { padding: 18px 18px; }
+  .body { font-size: 14.5px; }
+  .stat b { font-size: 22px; } .stat { min-width: 90px; padding: 8px 10px; }
+  .dots { top: 70px; transform: none; flex-direction: row; right: 50%; translate: 50% 0; }
+}
+</style>
+</head>
+<body>
+<canvas id="c" aria-hidden="true"></canvas>
+<a class="back" href="../offer/index.html">← Presentation kit</a>
+<div class="panel"><div class="card" id="card" aria-live="polite"></div></div>
+<nav class="dots" id="dots" aria-label="Chapters"></nav>
+<div class="bar">
+  <button id="prev" aria-label="Previous chapter">←</button>
+  <button id="play" aria-label="Autoplay">▶ Play</button>
+  <button id="next" class="go" aria-label="Next chapter">Next →</button>
+</div>
+<div class="tip" id="tip"></div>
+<script src="../data.js"></script>
+<script src="../africa.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.BRAIN_DATA || { fellows: [], skills: [], edges: [] };
+const FLAGS = window.AFRICA_FLAGS || {};
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------- data ----------
+const MERGE = { "data-ai": "tech", "software-cloud": "tech", "enterprise-transformation": "enterprise", finance: "finance", health: "health",
+  engineering: "engops", "operations-quality": "engops", "growth-media": "growth", "programmes-people": "programmes", sustainability: "sustain" };
+const AREAS = [
+  { id: "finance", label: "Finance & Payments", color: "#e34948" },
+  { id: "enterprise", label: "Enterprise Systems", color: "#6250d6" },
+  { id: "sustain", label: "Sustainability & ESG", color: "#008300" },
+  { id: "programmes", label: "Programmes & People", color: "#e87ba4" },
+  { id: "tech", label: "Data, AI & Software", color: "#2a78d6" },
+  { id: "health", label: "Health & Life Sciences", color: "#1baf7a" },
+  { id: "engops", label: "Engineering & Operations", color: "#eda100" },
+  { id: "growth", label: "Business Growth & Media", color: "#eb6834" },
+];
+const areaIdx = Object.fromEntries(AREAS.map((a, i) => [a.id, i]));
+const primary = (f) => MERGE[(f.clusters || [])[0]] || "tech";
+const byId = Object.fromEntries(D.fellows.map((f) => [f.id, f]));
+const skillEdges = (D.edges || []).filter((e) => e.type === "has-skill" && byId[e.from]);
+const bridging = D.fellows.filter((f) => skillEdges.some((e) => e.from === f.id && skillEdges.some((x) => x.to === e.to && primary(byId[x.from]) !== primary(f)))).length;
+const counts = {};
+for (const f of D.fellows) counts[f.country] = (counts[f.country] || 0) + 1;
+// roots run roughly west -> east, like the map
+const WEST_EAST = ["Morocco", "Ghana", "Nigeria", "Cameroon", "Egypt", "Sudan", "Ethiopia", "Uganda", "Kenya", "Tanzania", "Malawi"];
+const COUNTRIES = [...WEST_EAST.filter((c) => counts[c]), ...Object.keys(counts).filter((c) => !WEST_EAST.includes(c))];
+const N = D.fellows.length, NC = COUNTRIES.length;
+const flagImg = {};
+for (const c of COUNTRIES) if (FLAGS[c]) { const im = new Image(); im.src = FLAGS[c]; flagImg[c] = im; }
+
+// ---------- chapters ----------
+const areaChips = AREAS.filter((a) => D.fellows.some((f) => primary(f) === a.id)).map((a) => `<span class="chip"><i style="background:${a.color}"></i>${a.label}</span>`).join("");
+const CH = [
+  { k: "AFRIKA KOMMT! 15", t: "Every baobab begins as a seed.", b: "Small, hard-shelled, easy to overlook. And yet the whole tree is already inside it, waiting.",
+    cam: [0, 13, 7.5] },
+  { k: "The shell", t: "Something has to break it open.", b: "A baobab seed can lie dormant for years until heat, fire or a long journey cracks its shell. For us, that is AFRIKA KOMMT!: a new language, a new working culture, a year that will test us.",
+    cam: [0, 10, 5.5] },
+  { k: "Roots", t: "Where we come from.", b: "Our roots reach into the markets, cultures and languages we grew up in. Hover a root to see its country.",
+    stats: [[N, "fellows"], [NC, "countries"]], cam: [0, 60, 1.1] },
+  { k: "The Tree of Life", t: "Built to last.", b: "The baobab stores water through the hardest droughts and gives food, water, medicine and shelter. Some live for well over a thousand years. Panke, in Zimbabwe, was around 2,450 years old when it died in 2011.",
+    cam: [0, -80, 1.15] },
+  { k: "Branches", t: "What we offer.", b: `Eight areas of expertise grow from one trunk, and they connect: ${bridging} of the ${N} of us share a skill with someone from a different area.`,
+    chips: areaChips, cam: [0, -175, 1.2] },
+  { k: "The rain", t: "The right environment.", b: "Talent needs good soil, sun and rain. Mentors, trainers, the GIZ and AFRIKA KOMMT! team, and our partner companies: you are the rain.",
+    cam: [0, -160, 1.05] },
+  { k: "The trees before us", t: "We can see the trees that came before us.", b: "Since 2008, fellows have grown into leaders, from B. Braun Medical Ghana to SAP in Munich.",
+    stats: [["400+", "alumni since 2008"], ["31", "African countries"], ["50%+", "still with partner companies"], ["203", "sharing knowledge at home"]],
+    foot: "Alumni figures: AFRIKA KOMMT! programme, as given in the team's slide brief.", cam: [0, -130, 0.72] },
+  { k: "Exchange", t: "Growing through each other.", b: "Knowledge flows both ways. We bring markets, perspectives and fresh ideas; we learn how you build quality, scale and institutions that last. When you look towards Africa, we want to stand beside you and say: let me show you.",
+    cam: [0, -75, 0.95] },
+  { k: "The fruit", t: `${N} minds. One baobab.`, b: "Each fruit is one of us, coloured by our main area. Hover a fruit to meet the fellow.",
+    links: true, cam: [0, -130, 1.0] },
+];
+const LAST = CH.length - 1;
+
+// ---------- seeded random ----------
+let seed = 15;
+const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+const R = (a, b) => a + (b - a) * rnd();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ease = (t) => (t = clamp(t), t * t * (3 - 2 * t));
+const bell = (s, c, w) => clamp(1 - Math.abs(s - c) / w);
+const mix = (a, b, t) => a + (b - a) * t;
+
+// ---------- tree geometry (world units: ground y = 0, up is negative) ----------
+const TH = 150;                                   // trunk height
+const hw = (t) => 40 * (1 - 0.36 * t) + 10 * Math.sin(Math.PI * t); // bottle-shaped half width, t: 0 base -> 1 top
+const bark = [];
+for (let i = 0; i < 26; i++) bark.push({ x: R(-0.85, 0.85), t0: R(0, 0.5), t1: R(0.45, 1), wob: R(-3, 3) });
+const segs = [], limbs = [];
+AREAS.forEach((a, i) => {
+  const u = i / (AREAS.length - 1);
+  const ang = mix(-Math.PI * 0.9, -Math.PI * 0.1, u) + R(-0.06, 0.06);
+  const x0 = mix(-hw(1) * 0.85, hw(1) * 0.85, u), y0 = -TH + 4;
+  const limb = { area: a, pts: [], tip: null };
+  limbs.push(limb);
+  (function grow(x, y, an, len, w, d) {
+    const x1 = x + Math.cos(an) * len, y1 = y + Math.sin(an) * len;
+    const s = { x0: x, y0: y, x1, y1, w0: w, w1: w * 0.66, d, limb: i };
+    segs.push(s);
+    if (d >= 1) limb.pts.push({ x: x1, y: y1, d });
+    if (d === 0) limb.tip = { x: x1, y: y1 };
+    if (d < 3) {
+      const n = 2, spread = R(0.34, 0.58);
+      for (let k = 0; k < n; k++) grow(x1, y1, an + (k ? spread : -spread) + R(-0.12, 0.12) - 0.12 * Math.sign(Math.cos(an)) * (d === 0 ? 1 : 0), len * R(0.62, 0.76), w * 0.62, d + 1);
+    } else segs.at(-1).tip = true;
+  })(x0, y0, ang, R(62, 78), 17, 0);
+});
+const leafTips = segs.filter((s) => s.tip).map((s) => ({ x: s.x1, y: s.y1, delay: R(0, 0.5), blobs: Array.from({ length: 4 }, () => [R(-9, 9), R(-8, 4), R(5, 9), R(0, Math.PI)]) }));
+// labels for the areas sit beyond each limb's first fork
+// area labels sit on a staggered arc above the crown, each joined to the top of its limb by a thin leader
+limbs.forEach((l, i) => {
+  const deep = l.pts.filter((p) => p.d === 3), u = i / (limbs.length - 1);
+  l.anchor = deep.reduce((m, p) => (p.y < m.y ? p : m), deep[0] || l.tip);
+  l.label = { x: mix(-275, 275, u), y: -312 - (i % 3) * 36 - 18 * Math.sin(Math.PI * u) };
+});
+
+const roots = [];
+COUNTRIES.forEach((c, i) => {
+  const u = NC > 1 ? i / (NC - 1) : 0.5, n = counts[c];
+  // each root reaches toward its label; labels sit on a staggered arc (two rows) so neighbours never overlap
+  const x0 = mix(-hw(0) * 0.95, hw(0) * 0.95, u);
+  const lx = mix(-350, 350, u), ly = 92 + (i % 2) * 44 + 30 * Math.sin(Math.PI * u);
+  const ang = Math.atan2(ly - 2, lx - x0), dist = Math.hypot(lx - x0, ly - 2);
+  const r = { country: c, n, segs: [], tip: null, lab: { x: lx, y: ly } };
+  (function grow(x, y, an, len, w, d) {
+    const x1 = x + Math.cos(an) * len, y1 = y + Math.sin(an) * len;
+    r.segs.push({ x0: x, y0: y, x1, y1, w0: w, w1: w * 0.6, d });
+    if (d === 0) r.tip = { x: x1, y: y1 };
+    if (d < 2) for (let k = 0; k < 2; k++) grow(x1, y1, an + (k ? 1 : -1) * R(0.3, 0.6), len * 0.6, w * 0.55, d + 1);
+  })(x0, 2, ang, dist * 0.82, 6 + n * 0.9, 0);
+  roots.push(r);
+});
+
+// fruits: each fellow hangs from their area's limb
+const fruits = [];
+for (const a of AREAS) {
+  const fs = D.fellows.filter((f) => primary(f) === a.id).sort((x, y) => x.id.localeCompare(y.id));
+  const pts = [...limbs[areaIdx[a.id]].pts].sort((p, q) => q.d - p.d || p.x - q.x);
+  fs.forEach((f, k) => { const p = pts[k % pts.length]; fruits.push({ f, area: a, x: p.x + (k >= pts.length ? 6 : 0), y: p.y + 4, delay: R(0, 0.6), ph: R(0, 6) }); });
+}
+// background baobabs: the alumni "trees before us"
+const forest = Array.from({ length: 18 }, (_, i) => {
+  const side = i % 3 ? 1 : -1; // more on the right: the text card covers the left
+  return { x: side * R(230, 1100), s: R(0.28, 0.68), delay: R(0, 0.7), lean: R(-0.08, 0.08), limbs: Array.from({ length: 5 }, (_, k) => [mix(-2.7, -0.45, k / 4) + R(-0.1, 0.1), R(0.5, 0.8)]) };
+}).sort((a, b) => a.s - b.s);
+const grass = Array.from({ length: 220 }, () => ({ x: R(-1500, 1500), h: R(4, 13), lean: R(-0.5, 0.5) }));
+const hills = Array.from({ length: 9 }, (_, i) => ({ x: -1500 + i * 380 + R(-60, 60), w: R(260, 420), h: R(18, 44) }));
+
+// ---------- canvas + camera ----------
+const cv = document.getElementById("c"), cx = cv.getContext("2d");
+let W = 0, H = 0, DPR = 1, mobile = false;
+function resize() { DPR = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * DPR; cv.height = H * DPR; mobile = W < 760; }
+addEventListener("resize", resize); resize();
+let target = 0, s = 0;
+const cam = { x: CH[0].cam[0], y: CH[0].cam[1], z: CH[0].cam[2] };
+const base = () => Math.min(W / 980, H / 680) * (mobile ? 0.72 : 1);
+const anchor = () => (mobile ? [0.5, 0.3] : [0.63, 0.55]);
+const toScreen = (x, y) => { const k = base() * cam.z, [ax, ay] = anchor(); return [W * ax + (x - cam.x) * k, H * ay + (y - cam.y) * k]; };
+const toWorld = (sx, sy) => { const k = base() * cam.z, [ax, ay] = anchor(); return [(sx - W * ax) / k + cam.x, (sy - H * ay) / k + cam.y]; };
+
+// ---------- particles ----------
+const sparks = [], drops = [], flows = [];
+function flowPath(up) {
+  const r = roots[(Math.random() * roots.length) | 0], l = leafTips[(Math.random() * leafTips.length) | 0];
+  const pts = [[r.tip.x, r.tip.y], [r.segs[0].x0 * 0.6, 4], [R(-12, 12), -TH * 0.5], [R(-10, 10), -TH], [l.x, l.y]];
+  return up ? pts : pts.reverse();
+}
+const along = (pts, t) => {
+  const n = pts.length - 1, f = clamp(t) * n, i = Math.min(n - 1, Math.floor(f)), u = f - i;
+  return [mix(pts[i][0], pts[i + 1][0], u), mix(pts[i][1], pts[i + 1][1], u)];
+};
+
+// ---------- drawing helpers ----------
+const lerpC = (a, b, t) => { const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); const A = p(a), B = p(b); return `rgb(${A.map((v, i) => Math.round(mix(v, B[i], t))).join(",")})`; };
+const SKY = [ // [stage, top, horizon]
+  [0, "#14202e", "#5a4a5c"], [1, "#1f2a3c", "#c9744a"], [2.5, "#5d8fb3", "#f0c48a"], [4, "#7fb3d1", "#f4e2b5"],
+  [5, "#5f7f96", "#c9d3cf"], [6, "#86b9d4", "#f6e4bb"], [7, "#8fb4c9", "#f7dcae"], [8, "#d98a4e", "#fbe0b3"],
+];
+function skyAt(v) {
+  for (let i = 0; i < SKY.length - 1; i++) if (v <= SKY[i + 1][0]) { const t = clamp((v - SKY[i][0]) / (SKY[i + 1][0] - SKY[i][0])); return [lerpC(SKY[i][1], SKY[i + 1][1], t), lerpC(SKY[i][2], SKY[i + 1][2], t)]; }
+  return [SKY.at(-1)[1], SKY.at(-1)[2]];
+}
+function seg(x0, y0, x1, y1, w0, w1, col, p = 1) {
+  if (p <= 0) return;
+  const ex = mix(x0, x1, p), ey = mix(y0, y1, p), we = mix(w0, w1, p);
+  const [a, b] = toScreen(x0, y0), [c, d] = toScreen(ex, ey), k = base() * cam.z;
+  const nx = -(d - b), ny = c - a, L = Math.hypot(nx, ny) || 1;
+  const ux = nx / L, uy = ny / L;
+  cx.fillStyle = col;
+  cx.beginPath();
+  cx.moveTo(a + ux * w0 * k / 2, b + uy * w0 * k / 2); cx.lineTo(c + ux * we * k / 2, d + uy * we * k / 2);
+  cx.lineTo(c - ux * we * k / 2, d - uy * we * k / 2); cx.lineTo(a - ux * w0 * k / 2, b - uy * w0 * k / 2); cx.closePath(); cx.fill();
+  cx.beginPath(); cx.arc(c, d, we * k / 2, 0, 7); cx.fill();
+  cx.beginPath(); cx.arc(a, b, w0 * k / 2, 0, 7); cx.fill();
+}
+function pill(x, y, text, dot, alpha, img) {
+  if (alpha <= 0.01) return;
+  cx.save(); cx.globalAlpha = alpha;
+  cx.font = `700 ${mobile ? 11 : 13}px Montserrat, Segoe UI, sans-serif`;
+  const tw = cx.measureText(text).width, pad = img ? 30 : dot ? 22 : 12, w = tw + pad + 10, h = mobile ? 22 : 26;
+  cx.fillStyle = "rgba(255,255,255,.93)"; cx.beginPath(); cx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); cx.fill();
+  if (img && img.complete) cx.drawImage(img, x - w / 2 + 8, y - 6, 16, 12);
+  else if (dot) { cx.fillStyle = dot; cx.beginPath(); cx.arc(x - w / 2 + 13, y, 5, 0, 7); cx.fill(); }
+  cx.fillStyle = "#1d2a1f"; cx.textBaseline = "middle"; cx.fillText(text, x - w / 2 + pad, y + 1);
+  cx.restore();
+}
+
+// ---------- frame ----------
+let last = performance.now(), time = 0, hover = null;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; time += dt;
+  s += (target - s) * (REDUCED ? 1 : 1 - Math.exp(-dt * 1.5));
+  if (Math.abs(target - s) < 0.001) s = target;
+  // camera follows the chapter blend
+  const i0 = Math.floor(s), i1 = Math.min(LAST, i0 + 1), u = ease(s - i0), A = CH[i0].cam, B = CH[i1].cam;
+  cam.x = mix(A[0], B[0], u); cam.y = mix(A[1], B[1], u); cam.z = Math.exp(mix(Math.log(A[2]), Math.log(B[2]), u));
+
+  const fireI = bell(s, 1, 0.9), crack = ease((s - 0.6) / 0.8), rootP = ease((s - 1.5) / 1), trunkP = ease((s - 2.2) / 1.1);
+  const branchP = clamp((s - 3.2) / 1.0), rainI = bell(s, 5, 0.85), leafP = clamp((s - 4.5) / 0.9), forestP = clamp((s - 5.4) / 0.9);
+  const flowI = bell(s, 7, 0.9), fruitP = clamp((s - 7.3) / 0.8), k = base() * cam.z;
+
+  cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  // sky
+  const [top, hor] = skyAt(s), [, gy] = toScreen(0, 0);
+  const g = cx.createLinearGradient(0, 0, 0, Math.max(10, gy));
+  g.addColorStop(0, top); g.addColorStop(1, hor);
+  cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+  // stars at the start
+  if (s < 2) { cx.fillStyle = `rgba(255,255,255,${0.7 * (1 - s / 2)})`; for (let i = 0; i < 90; i++) { const x = (i * 97.3) % W, y = (i * 53.1) % Math.max(1, gy * 0.8); cx.fillRect(x, y, 1.4, 1.4); } }
+  // sun
+  const sunY = s < 6 ? mix(60, -300, ease(s / 5)) : mix(-300, -150, ease((s - 6) / 2)), [sx, sy] = toScreen(330, sunY);
+  const sg = cx.createRadialGradient(sx, sy, 0, sx, sy, 140 * k);
+  sg.addColorStop(0, "rgba(255,236,170,.95)"); sg.addColorStop(0.18, "rgba(255,214,120,.7)"); sg.addColorStop(1, "rgba(255,200,120,0)");
+  cx.fillStyle = sg; cx.beginPath(); cx.arc(sx, sy, 140 * k, 0, 7); cx.fill();
+  cx.fillStyle = "#fff3c9"; cx.beginPath(); cx.arc(sx, sy, 22 * k, 0, 7); cx.fill();
+  // clouds for the rain
+  if (rainI > 0) {
+    cx.save(); cx.globalAlpha = rainI * 0.85; cx.fillStyle = "#8d9aa3";
+    for (let i = 0; i < 7; i++) { const [x, y] = toScreen(-260 + i * 90 + Math.sin(time * 0.2 + i) * 12, -330 - (i % 2) * 22); cx.beginPath(); cx.ellipse(x, y, 70 * k, 26 * k, 0, 0, 7); cx.fill(); }
+    cx.restore();
+  }
+  // far hills
+  cx.fillStyle = "rgba(120,110,80,.35)";
+  for (const h of hills) { const [x, y] = toScreen(h.x, 0); cx.beginPath(); cx.ellipse(x, y, h.w * k, h.h * k, 0, Math.PI, 0); cx.fill(); }
+  // the trees before us (alumni)
+  if (forestP > 0) for (const t of forest) {
+    const p = ease((forestP - t.delay * 0.5) / 0.5); if (p <= 0) continue;
+    const col = `rgba(70,80,60,${0.55 * p})`, h = TH * t.s * p;
+    seg(t.x, 0, t.x + t.lean * h, -h, 60 * t.s, 34 * t.s, col);
+    for (const [an, l] of t.limbs) seg(t.x + t.lean * h, -h + 4 * t.s, t.x + t.lean * h + Math.cos(an) * 70 * t.s * l * p, -h + Math.sin(an) * 70 * t.s * l * p, 14 * t.s, 6 * t.s, col);
+  }
+  // ground + soil
+  cx.fillStyle = "#c5a862"; cx.fillRect(0, gy, W, H - gy);
+  const [, soilY] = toScreen(0, 10);
+  const sgr = cx.createLinearGradient(0, soilY, 0, H);
+  sgr.addColorStop(0, "#7a5437"); sgr.addColorStop(1, "#3a2618");
+  cx.fillStyle = sgr; cx.fillRect(0, soilY, W, H - soilY);
+  cx.strokeStyle = "#a88a45"; cx.lineWidth = Math.max(1, 1.2 * k);
+  for (const gr of grass) { const [x, y] = toScreen(gr.x, 0), gk = Math.min(k, 2.2); if (x < -20 || x > W + 20) continue; cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x + gr.lean * gr.h * gk + Math.sin(time + gr.x) * gk, y - gr.h * gk); cx.stroke(); }
+
+  // roots (country)
+  for (const r of roots) for (const sgm of r.segs) {
+    const p = clamp(rootP * 2.2 - sgm.d * 0.55);
+    seg(sgm.x0, sgm.y0, sgm.x1, sgm.y1, sgm.w0, sgm.w1, "#c9a27a", ease(p));
+  }
+  // seed, fire, crack, sprout stem
+  if (s < 3.2) {
+    const al = 1 - clamp((s - 2.4) / 0.8), [px, py] = toScreen(0, 14);
+    if (fireI > 0) {
+      const fl = 0.85 + 0.15 * Math.sin(time * 13) * Math.sin(time * 7);
+      const fg = cx.createRadialGradient(px, py, 0, px, py, 26 * k * fl);
+      fg.addColorStop(0, `rgba(255,190,80,${0.9 * fireI})`); fg.addColorStop(0.4, `rgba(240,110,40,${0.5 * fireI})`); fg.addColorStop(1, "rgba(200,60,20,0)");
+      cx.fillStyle = fg; cx.beginPath(); cx.arc(px, py, 26 * k * fl, 0, 7); cx.fill();
+      if (!REDUCED && Math.random() < fireI * 0.9) sparks.push({ x: R(-3, 3), y: 12, vx: R(-6, 6), vy: R(-22, -10), life: 1 });
+    }
+    cx.save(); cx.globalAlpha = al; cx.translate(px, py);
+    const open = crack * 0.45;
+    for (const side of [-1, 1]) {
+      cx.save(); cx.rotate(side * open * 0.6); cx.translate(side * open * 2 * k, 0);
+      cx.fillStyle = "#5b3a22"; cx.beginPath(); cx.ellipse(0, 0, 4.4 * k, 3 * k, 0, side < 0 ? Math.PI / 2 : -Math.PI / 2, side < 0 ? Math.PI * 1.5 : Math.PI / 2); cx.fill();
+      cx.restore();
+    }
+    cx.fillStyle = "rgba(255,255,255,.18)"; cx.beginPath(); cx.ellipse(-1.4 * k, -1 * k, 1.6 * k, 0.8 * k, -0.4, 0, 7); cx.fill();
+    if (crack > 0.05 && crack < 0.98) { cx.strokeStyle = "#f6d27a"; cx.lineWidth = 0.4 * k; cx.beginPath(); cx.moveTo(0, -3 * k); cx.lineTo(0.6 * k, -1 * k); cx.lineTo(-0.5 * k, 0.6 * k); cx.lineTo(0.3 * k, 3 * k); cx.stroke(); }
+    cx.restore();
+    const sp = ease((s - 1.3) / 0.9);
+    if (sp > 0) { // the first shoot: from the seed up through the soil
+      seg(0, 12, 0, mix(12, -6, sp), 0.9, 0.7, "#7fae4d");
+      if (sp > 0.85 && trunkP < 0.3) for (const side of [-1, 1]) { const [lx, ly] = toScreen(side * 3, -6); cx.fillStyle = "#86b84f"; cx.beginPath(); cx.ellipse(lx, ly, 3.2 * k, 1.3 * k, side * 0.5, 0, 7); cx.fill(); }
+    }
+  }
+  // sparks
+  for (let i = sparks.length - 1; i >= 0; i--) { const p = sparks[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt * 1.3; if (p.life <= 0) { sparks.splice(i, 1); continue; }
+    const [x, y] = toScreen(p.x, p.y); cx.fillStyle = `rgba(255,${150 + 80 * p.life | 0},60,${p.life})`; cx.beginPath(); cx.arc(x, y, Math.max(1, 0.5 * k), 0, 7); cx.fill(); }
+
+  // trunk
+  if (trunkP > 0) {
+    const hgt = TH * trunkP, ws = Math.pow(trunkP, 1.7), steps = 24, L = [], Rr = [];
+    for (let i = 0; i <= steps; i++) { const t = i / steps, w = hw(t) * ws + 1.2; L.push(toScreen(-w, -hgt * t)); Rr.push(toScreen(w, -hgt * t)); }
+    const tg = cx.createLinearGradient(L[0][0], 0, Rr[0][0], 0);
+    tg.addColorStop(0, "#6c5a4a"); tg.addColorStop(0.45, "#a08976"); tg.addColorStop(1, "#5d4c3e");
+    cx.fillStyle = tg; cx.beginPath(); cx.moveTo(...L[0]);
+    for (const p of L) cx.lineTo(...p);
+    const [tx, ty] = toScreen(0, -hgt - 6 * ws);
+    cx.quadraticCurveTo(tx, ty, ...Rr.at(-1));
+    for (let i = Rr.length - 1; i >= 0; i--) cx.lineTo(...Rr[i]);
+    cx.closePath(); cx.fill();
+    if (trunkP > 0.5) { // bark lines
+      cx.strokeStyle = `rgba(60,45,35,${0.35 * (trunkP - 0.5) * 2})`; cx.lineWidth = Math.max(1, 1.3 * k);
+      for (const b of bark) { cx.beginPath(); for (let j = 0; j <= 6; j++) { const t = mix(b.t0, b.t1, j / 6), w = hw(t) * ws, [x, y] = toScreen(b.x * w + Math.sin(j + b.wob) * b.wob * 0.4, -hgt * t); j ? cx.lineTo(x, y) : cx.moveTo(x, y); } cx.stroke(); }
+    }
+  }
+  // branches
+  if (branchP > 0) for (const sg2 of segs) {
+    const p = ease((branchP - sg2.d * 0.2) / 0.45);
+    seg(sg2.x0, sg2.y0, sg2.x1, sg2.y1, sg2.w0, sg2.w1, sg2.d === 0 ? "#7d6857" : "#857060", p);
+  }
+  // leaves
+  if (leafP > 0) for (const l of leafTips) {
+    const p = ease((leafP - l.delay) / 0.5); if (p <= 0) continue;
+    for (const [dx, dy, r, rot] of l.blobs) { const [x, y] = toScreen(l.x + dx, l.y + dy + Math.sin(time * 1.3 + l.x) * 0.6); cx.fillStyle = "rgba(96,140,62,.86)"; cx.beginPath(); cx.ellipse(x, y, r * p * k, r * 0.62 * p * k, rot, 0, 7); cx.fill(); }
+  }
+  // rain
+  if (rainI > 0.02 && !REDUCED) for (let i = 0; i < 6 * rainI; i++) drops.push({ x: R(-340, 340), y: -320, v: R(260, 360) });
+  cx.strokeStyle = "rgba(210,230,245,.55)"; cx.lineWidth = Math.max(1, 0.8 * k);
+  for (let i = drops.length - 1; i >= 0; i--) { const d = drops[i]; d.y += d.v * dt; if (d.y > 4) { drops.splice(i, 1); continue; } const [x, y] = toScreen(d.x, d.y); cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x - 1.5 * k, y + 9 * k); cx.stroke(); }
+  // exchange flows: gold up (what we bring), light blue down (what we learn)
+  if (flowI > 0.02 && !REDUCED) for (let i = 0; i < 2; i++) if (Math.random() < flowI) flows.push({ pts: flowPath(i === 0), t: 0, up: i === 0, sp: R(0.28, 0.4) });
+  for (let i = flows.length - 1; i >= 0; i--) { const f = flows[i]; f.t += dt * f.sp; if (f.t >= 1) { flows.splice(i, 1); continue; }
+    const [wx, wy] = along(f.pts, f.t), [x, y] = toScreen(wx, wy), a = Math.sin(Math.PI * f.t);
+    cx.fillStyle = f.up ? `rgba(255,205,90,${a})` : `rgba(150,215,255,${a})`; cx.beginPath(); cx.arc(x, y, Math.max(1.6, 2.4 * k), 0, 7); cx.fill(); }
+  if (flowI > 0.2) {
+    const [lx, ly] = toScreen(-170, -255), [rx, ry] = toScreen(170, -255);
+    pill(lx, ly, "↑ We bring: markets, perspectives, ideas", "#ffcd5a", flowI);
+    pill(rx, ry, "↓ We learn: quality, scale, process", "#96d7ff", flowI);
+  }
+  // fruits
+  if (fruitP > 0) for (const fr of fruits) {
+    const p = ease((fruitP - fr.delay * 0.5) / 0.5); if (p <= 0) continue;
+    const sw = Math.sin(time * 1.4 + fr.ph) * 0.12, [x0, y0] = toScreen(fr.x, fr.y), len = 9 * k * p;
+    const fx = x0 + Math.sin(sw) * len, fy = y0 + Math.cos(sw) * len, on = hover && hover.kind === "fruit" && hover.o === fr;
+    cx.strokeStyle = "#5d4c3e"; cx.lineWidth = Math.max(1, 0.8 * k); cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(fx, fy); cx.stroke();
+    cx.fillStyle = fr.area.color; cx.strokeStyle = on ? "#fff" : "rgba(0,0,0,.25)"; cx.lineWidth = on ? 2.5 : 1;
+    cx.beginPath(); cx.ellipse(fx, fy + 6 * k * p, 4.6 * k * p * (on ? 1.3 : 1), 7.5 * k * p * (on ? 1.3 : 1), sw, 0, 7); cx.fill(); cx.stroke();
+    fr.sx = fx; fr.sy = fy + 6 * k * p; fr.sr = 9 * k * p;
+  }
+  // labels: countries at root tips, areas on the branches
+  const rootLab = clamp(bell(s, 2.3, 1.3) * 1.8);
+  for (const r of roots) { const [x, y] = toScreen(r.lab.x, r.lab.y); r.sx = x; r.sy = y; pill(x, y, `${r.country} · ${r.n}`, null, rootLab * rootP, flagImg[r.country]); }
+  const areaLab = clamp((s - 3.7) / 0.5) * (1 - clamp((s - 5.25) / 0.35));
+  for (const l of limbs) {
+    const [x, y] = toScreen(l.label.x, l.label.y), [ax, ay] = toScreen(l.anchor.x, l.anchor.y);
+    if (areaLab > 0.01) { cx.strokeStyle = `rgba(255,255,255,${0.6 * areaLab})`; cx.lineWidth = 1.2; cx.beginPath(); cx.moveTo(ax, ay); cx.lineTo(x, y); cx.stroke(); }
+    pill(x, y, l.area.label, l.area.color, areaLab);
+  }
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ---------- chapter UI ----------
+const card = document.getElementById("card"), dots = document.getElementById("dots");
+CH.forEach((c, i) => { const b = document.createElement("button"); b.title = c.k; b.setAttribute("aria-label", `Chapter ${i + 1}: ${c.k}`); b.onclick = () => go(i); dots.appendChild(b); });
+let shown = -1, swapT = 0;
+function render(i) {
+  const c = CH[i];
+  card.innerHTML = `<p class="kicker">${i + 1} / ${CH.length} · ${c.k}</p><h1>${c.t}</h1><p class="body">${c.b}</p>`
+    + (c.stats ? `<div class="stats">${c.stats.map(([v, l]) => `<div class="stat"><b data-v="${v}">${v}</b><span>${l}</span></div>`).join("")}</div>` : "")
+    + (c.chips ? `<div class="chips">${c.chips}</div>` : "")
+    + (c.links ? `<div class="links"><a href="../offer/index.html">What we offer →</a><a class="ghost" href="../index.html">Explore the full map</a></div>` : "")
+    + (c.foot ? `<p class="foot">${c.foot}</p>` : "");
+  // count the numbers up
+  card.querySelectorAll(".stat b").forEach((b) => {
+    const raw = b.dataset.v, m = /^(\d+)(.*)$/.exec(raw); if (!m || REDUCED) return;
+    const to = +m[1], suf = m[2], t0 = performance.now();
+    const tick = (now) => { const p = ease((now - t0) / 1100); b.textContent = Math.round(to * p) + suf; if (p < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  });
+  [...dots.children].forEach((d, j) => d.classList.toggle("on", j === i));
+  document.getElementById("prev").disabled = i === 0;
+  document.getElementById("next").textContent = i === LAST ? "↺ Start again" : "Next →";
+}
+function go(i) {
+  i = Math.max(0, Math.min(LAST, i));
+  target = i;
+  if (i === shown) return;
+  shown = i; card.classList.add("out"); clearTimeout(swapT);
+  swapT = setTimeout(() => { render(i); card.classList.remove("out"); }, REDUCED ? 0 : 380);
+  try { history.replaceState(null, "", "#" + (i + 1)); } catch (e) {}
+}
+const start = Math.max(0, Math.min(LAST, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+target = s = start; render(start); shown = start;
+document.getElementById("prev").onclick = () => go(shown - 1);
+document.getElementById("next").onclick = () => go(shown === LAST ? 0 : shown + 1);
+let playT = 0;
+const playBtn = document.getElementById("play");
+function setPlay(on) { clearInterval(playT); playBtn.textContent = on ? "❚❚ Pause" : "▶ Play"; if (on) playT = setInterval(() => (shown === LAST ? setPlay(false) : go(shown + 1)), 7000); }
+playBtn.onclick = () => setPlay(playBtn.textContent.startsWith("▶"));
+addEventListener("keydown", (e) => {
+  if (["ArrowRight", "ArrowDown", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(shown + 1); }
+  if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) { e.preventDefault(); go(shown - 1); }
+  if (e.key === "Home") go(0);
+  if (e.key === "End") go(LAST);
+  if (e.key === "f" || e.key === "F") document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+  if (e.key === "p" || e.key === "P") playBtn.click();
+});
+let wheelLock = 0;
+addEventListener("wheel", (e) => { if (Math.abs(e.deltaY) < 12 || performance.now() < wheelLock) return; wheelLock = performance.now() + 900; go(shown + (e.deltaY > 0 ? 1 : -1)); }, { passive: true });
+let touchY = null;
+addEventListener("touchstart", (e) => { touchY = e.touches[0].clientY; }, { passive: true });
+addEventListener("touchend", (e) => { if (touchY == null) return; const d = touchY - e.changedTouches[0].clientY; if (Math.abs(d) > 40) go(shown + (d > 0 ? 1 : -1)); touchY = null; });
+
+// ---------- hover: fruits (fellows) and root tips (countries) ----------
+const tip = document.getElementById("tip");
+cv.addEventListener("mousemove", (e) => {
+  hover = null;
+  if (s > 7.6) for (const fr of fruits) if (fr.sr && Math.hypot(e.clientX - fr.sx, e.clientY - fr.sy) < Math.max(10, fr.sr)) { hover = { kind: "fruit", o: fr }; break; }
+  if (!hover && s > 1.8 && s < 3.6) for (const r of roots) if (Math.hypot(e.clientX - r.sx, e.clientY - r.sy) < 40) { hover = { kind: "root", o: r }; break; }
+  if (!hover) { tip.style.opacity = 0; cv.style.cursor = ""; return; }
+  cv.style.cursor = "pointer";
+  if (hover.kind === "fruit") {
+    const f = hover.o.f, fl = FLAGS[f.country] ? `<img src="${FLAGS[f.country]}" alt="">` : "";
+    tip.innerHTML = `<b>${f.name}</b>${f.role}<br>${fl}${f.country}<div class="a"><i style="background:${hover.o.area.color}"></i>${hover.o.area.label}</div>`;
+  } else {
+    const r = hover.o, fl = FLAGS[r.country] ? `<img src="${FLAGS[r.country]}" alt="">` : "";
+    tip.innerHTML = `<b>${fl}${r.country}</b>${r.n} fellow${r.n > 1 ? "s" : ""}`;
+  }
+  tip.style.left = Math.min(innerWidth - 270, e.clientX + 16) + "px"; tip.style.top = (e.clientY + 16) + "px"; tip.style.opacity = 1;
+});
+cv.addEventListener("mouseleave", () => { hover = null; tip.style.opacity = 0; });
+})();
+</script>
+</body>
+</html>

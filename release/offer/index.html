@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AK!15 Presentation Kit</title>
+<!-- New presentation material for the 4 Dec kick-off, kept apart from the original map (/), story (/motion.html) and /daph.
+     Render modes for slide exports (used by scripts/export-slides.mjs):
+       ?render=slide&step=1..5    16:9 What We Offer slide
+       ?render=graphic&step=1..5  the centre graphic only, transparent background
+       ?render=map                intro map: 11 countries and fellows per country -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  /* deck theme (Canva "AFRIKA KOMMT - Presentation"): forest green, cream, white heavy type */
+  --green: #2d6a39; --green-2: #1f4d29; --green-soft: #e4eee1; --cream: #faf7f0; --cream-2: #f1ece0;
+  --ink: #1d2a1f; --ink-2: #56635a; --line: #ddd6c6; --skill: #8d978e; --gold: #c9962b;
+  --font: "Montserrat", "Segoe UI", system-ui, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font); }
+a { color: var(--green); }
+.top { position: sticky; top: 0; z-index: 5; background: var(--green); color: #fff; display: flex; align-items: center; gap: 18px; padding: 10px 20px; flex-wrap: wrap; }
+.top b { font-weight: 800; letter-spacing: .02em; }
+.top nav { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; font-weight: 600; }
+.top nav a { color: #fff; opacity: .85; text-decoration: none; }
+.top nav a:hover { opacity: 1; text-decoration: underline; }
+main { max-width: 1180px; margin: 0 auto; padding: 28px 16px 80px; }
+section { margin: 0 0 64px; }
+h2 { font-size: 28px; font-weight: 800; margin: 0 0 6px; color: var(--green-2); }
+.sub { color: var(--ink-2); margin: 0 0 18px; line-height: 1.5; max-width: 760px; }
+.frame { width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 40px rgba(31, 77, 41, .18); background: var(--cream); }
+.controls { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+button, .btn { font: 600 14px var(--font); border: 1.5px solid var(--green); background: #fff; color: var(--green); border-radius: 999px; padding: 8px 16px; cursor: pointer; text-decoration: none; }
+button.primary { background: var(--green); color: #fff; }
+button:disabled { opacity: .35; cursor: default; }
+.stepname { font-weight: 700; min-width: 210px; }
+.hint { color: var(--ink-2); font-size: 13px; }
+/* ---------- slide (1920x1080 design units) ---------- */
+.slide { width: 1920px; height: 1080px; position: relative; background: var(--cream); transform-origin: 0 0; overflow: hidden; }
+.slide .band { position: absolute; left: 0; top: 0; bottom: 0; width: 640px; background: var(--green); }
+.slide h1 { position: absolute; left: 80px; top: 70px; margin: 0; color: #fff; font-size: 84px; line-height: 1.02; font-weight: 900; letter-spacing: -.01em; }
+.slide ol { position: absolute; left: 80px; top: 300px; margin: 0; padding: 0; list-style: none; width: 500px; }
+.slide li { color: #fff; margin: 0 0 22px; opacity: 0; transform: translateX(-24px); transition: opacity .5s, transform .5s; }
+.slide li.on { opacity: 1; transform: none; }
+.slide li .n { display: inline-block; width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--green); font-weight: 800; font-size: 24px; text-align: center; line-height: 46px; margin-right: 18px; vertical-align: middle; }
+.slide li .t { font-size: 36px; font-weight: 800; vertical-align: middle; }
+.slide li .d { display: block; margin: 6px 0 0 64px; font-size: 21px; font-weight: 500; opacity: .85; line-height: 1.35; }
+.slide li.cur .t { color: #ffe9a8; }
+.slide .gwrap { position: absolute; left: 660px; top: 20px; width: 1240px; height: 1040px; }
+.slide .logo { position: absolute; right: 40px; bottom: 30px; font-size: 18px; font-weight: 700; color: var(--green); opacity: .7; }
+/* ---------- the graphic ---------- */
+svg.graph { width: 100%; height: 100%; display: block; overflow: visible; font-family: var(--font); }
+.graph .edge { fill: none; stroke-width: 1.5; stroke-opacity: .5; transition: stroke-opacity .6s, stroke-width .6s; }
+.graph .skill { fill: var(--skill); transition: opacity .6s, fill .6s; }
+.graph .hub { fill: none; stroke: var(--line); stroke-width: 1.2; transition: opacity .6s; }
+.graph .arc { fill: none; stroke-width: 11; stroke-linecap: round; }
+.graph .label { font-size: 22px; font-weight: 700; fill: var(--ink); }
+.graph .fellow { stroke: var(--cream); stroke-width: 3; transition: r .6s; }
+.graph .flag { transition: opacity .6s; opacity: 0; }
+.graph .flagring { fill: none; stroke: #fff; stroke-width: 2; }
+.graph .core { transition: opacity .7s; opacity: 0; }
+.graph .core .big { font-size: 150px; font-weight: 900; fill: var(--green); }
+.graph .core .small { font-size: 30px; font-weight: 700; fill: var(--green-2); letter-spacing: .08em; text-transform: uppercase; }
+.graph .edges, .graph .skills { transition: opacity .6s; }
+.graph[data-step="1"] .edges, .graph[data-step="1"] .skills { opacity: 0; }
+.graph[data-step="3"] .flag, .graph[data-step="4"] .flag, .graph[data-step="5"] .flag { opacity: 1; }
+.graph[data-step="3"] .edge { stroke-opacity: .22; }
+.graph[data-step="4"] .edge { stroke-opacity: .07; }
+.graph[data-step="4"] .edge.cross { stroke-opacity: .8; stroke-width: 2.2; }
+.graph[data-step="4"] .skill:not(.cross) { opacity: .2; }
+.graph[data-step="4"] .skill.cross { fill: var(--ink); }
+.graph[data-step="5"] .edge { stroke-opacity: .38; }
+.graph[data-step="5"] .core { opacity: 1; }
+.graph .caption { font-size: 26px; font-weight: 600; fill: var(--ink-2); }
+/* ---------- map ---------- */
+.mapframe { background: var(--cream); }
+/* ---------- script ---------- */
+.script { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 26px 30px; line-height: 1.65; font-size: 17px; }
+.script h3 { margin: 26px 0 6px; font-size: 19px; color: var(--green); }
+.script h3:first-child { margin-top: 0; }
+.script .tbc { background: #fff4d6; border-radius: 4px; padding: 0 4px; }
+.script .cue { color: var(--ink-2); font-style: italic; font-size: 15px; }
+.dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.dl a { display: block; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 14px; }
+.dl a span { display: block; color: var(--ink-2); font-weight: 500; font-size: 12px; margin-top: 3px; }
+.dl a:hover { border-color: var(--green); }
+/* render mode: one bare frame, no chrome, no transitions */
+body.render { background: transparent; }
+body.render .top, body.render main > :not(#renderHost) { display: none; }
+body.render main { max-width: none; padding: 0; margin: 0; }
+body.render * { transition: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <b>AK!15 · Presentation kit</b>
+  <nav>
+    <a href="#offer">What we offer</a><a href="#map">Intro map</a><a href="#script">Script</a><a href="#downloads">Downloads</a>
+    <a href="../baobab/index.html">Baobab story</a><a href="../index.html">Full map</a>
+  </nav>
+</header>
+<main>
+  <div id="renderHost"></div>
+
+  <section id="offer">
+    <h2>What do we offer? The slide</h2>
+    <p class="sub">One slide, five points, each one adding to the picture. Use the arrow keys or the buttons. Each step is also exported as an image (see Downloads), so it works in Canva or PowerPoint as plain slide transitions.</p>
+    <div class="frame" id="slideFrame"></div>
+    <div class="controls">
+      <button id="prev" aria-label="Previous point">◀</button>
+      <button id="next" class="primary" aria-label="Next point">▶</button>
+      <span class="stepname" id="stepName"></span>
+      <button id="svgBtn">Download SVG of this step</button>
+      <span class="hint">← → keys</span>
+    </div>
+  </section>
+
+  <section id="map">
+    <h2>Where we come from: intro map</h2>
+    <p class="sub">For the intro's "what we have in common" slide and Kelvin and Agnes's outro dialogue: the 11 countries and how many of us come from each.</p>
+    <div class="frame mapframe" id="mapFrame"></div>
+  </section>
+
+  <section id="script">
+    <h2>Script draft: What We Offer (Daphine and David)</h2>
+    <p class="sub">Built on Daphine's rehearsal draft and the five talking points. The numbers come from the cohort data. <span class="tbc">Yellow</span> marks what we still need, such as the five fellows' achievements. About 3½ minutes at a calm pace.</p>
+    <div class="script" id="scriptBody"></div>
+  </section>
+
+  <section id="downloads">
+    <h2>Downloads</h2>
+    <p class="sub">4K images (3840 × 2160) for the slide and the map. The graphic-only files have a transparent background, so they sit on any slide colour.</p>
+    <div class="dl" id="dlList"></div>
+  </section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="../data.js"></script>
+<script src="../africa.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.BRAIN_DATA || { fellows: [], skills: [], edges: [] };
+const FLAGS = window.AFRICA_FLAGS || {};
+const NS = "http://www.w3.org/2000/svg";
+const qs = new URLSearchParams(location.search);
+const RENDER = qs.get("render");
+// Same 10 -> 8 merge and colour order as /daph and the motion story.
+const MERGE = { "data-ai": "tech", "software-cloud": "tech", "enterprise-transformation": "enterprise", finance: "finance", health: "health",
+  engineering: "engops", "operations-quality": "engops", "growth-media": "growth", "programmes-people": "programmes", sustainability: "sustain" };
+const AREAS = [
+  { id: "tech", label: "Data, AI & Software", color: "#2a78d6" },
+  { id: "growth", label: "Business Growth & Media", color: "#eb6834" },
+  { id: "health", label: "Health & Life Sciences", color: "#1baf7a" },
+  { id: "engops", label: "Engineering & Operations", color: "#eda100" },
+  { id: "programmes", label: "Programmes & People", color: "#e87ba4" },
+  { id: "sustain", label: "Sustainability & ESG", color: "#008300" },
+  { id: "enterprise", label: "Enterprise Systems", color: "#6250d6" },
+  { id: "finance", label: "Finance & Payments", color: "#e34948" },
+];
+const areaById = Object.fromEntries(AREAS.map((a, i) => [a.id, { ...a, i }]));
+const primary = (f) => MERGE[(f.clusters || [])[0]] || "tech";
+const byId = Object.fromEntries(D.fellows.map((f) => [f.id, f]));
+const skillEdges = (D.edges || []).filter((e) => e.type === "has-skill" && byId[e.from]);
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+const xy = (a, r) => [Math.cos(a) * r, Math.sin(a) * r];
+const f1 = (n) => n.toFixed(1);
+
+// ---------- facts, all computed from the data ----------
+const countries = {};
+for (const f of D.fellows) countries[f.country] = (countries[f.country] || 0) + 1;
+const nCountries = Object.keys(countries).length;
+const areasUsed = new Set(D.fellows.map(primary));
+const bridging = D.fellows.filter((f) => skillEdges.some((e) => e.from === f.id && skillEdges.some((x) => x.to === e.to && primary(byId[x.from]) !== primary(f)))).length;
+const crossSkillIds = new Set(D.skills.filter((sk) => new Set(skillEdges.filter((e) => e.to === sk.id).map((e) => primary(byId[e.from]))).size >= 2).map((s) => s.id));
+// global firms named in current or recent roles (roster role/org fields); a floor, not a full count
+const GLOBAL = /\b(EY|KPMG|PwC|Schneider Electric|Stellantis|Huawei|Microsoft|P&G|Bayer|UN Volunteers)\b/;
+const globalFirms = D.fellows.filter((f) => GLOBAL.test(`${f.role} ${f.org}`));
+const firmNames = [...new Set(globalFirms.flatMap((f) => (`${f.role} ${f.org}`.match(new RegExp(GLOBAL.source, "g")) || [])))];
+const FACT = {
+  n: D.fellows.length, countries: nCountries, areas: areasUsed.size, bridging, cross: crossSkillIds.size, skills: D.skills.length,
+  global: globalFirms.length, firms: firmNames,
+};
+
+const STEPS = [
+  { t: "Diversity", d: `${FACT.n} fellows · ${FACT.countries} countries · ${FACT.areas} areas of expertise` },
+  { t: "Connected expertise", d: `${FACT.bridging} of ${FACT.n} of us share a skill with someone from another area` },
+  { t: "African perspectives", d: `${FACT.countries} home markets, plus experience at global firms` },
+  { t: "Mutual exchange", d: `${FACT.cross} of our ${FACT.skills} skills cross areas. We learn and we teach` },
+  { t: "32 bridges", d: "Between Africa and Germany, and between disciplines" },
+];
+
+// ---------- the graphic (areas ring) ----------
+function buildGraph(step) {
+  const R_F = 380, R_S = 215, R_FLAG = 420, R_ARC = 462, GAP = 2;
+  const svg = el("svg", { class: "graph", viewBox: "-760 -560 1520 1120", "data-step": step, role: "img", "aria-label": "Areas of expertise of the AFRIKA KOMMT! 15 cohort" });
+  const order = [...D.fellows].sort((a, b) => areaById[primary(a)].i - areaById[primary(b)].i || a.id.localeCompare(b.id));
+  const groups = [];
+  for (const f of order) { const k = primary(f); if (!groups.length || groups.at(-1).k !== k) groups.push({ k, items: [] }); groups.at(-1).items.push(f); }
+  const st = (2 * Math.PI) / (order.length + GAP * groups.length || 1);
+  const pos = {}, arcs = [];
+  let s = GAP / 2;
+  for (const g of groups) {
+    const a0 = -Math.PI / 2 + st * (s + 0.5);
+    for (const f of g.items) { pos[f.id] = { a: -Math.PI / 2 + st * (s + 0.5), r: R_F }; s++; }
+    arcs.push({ id: g.k, a0: a0 - st * 0.4, a1: -Math.PI / 2 + st * (s - 0.5) + st * 0.4 });
+    s += GAP;
+  }
+  const means = D.skills.map((sk) => {
+    const as = skillEdges.filter((e) => e.to === sk.id && pos[e.from]).map((e) => pos[e.from].a);
+    let m = Math.atan2(as.reduce((t, a) => t + Math.sin(a), 0), as.reduce((t, a) => t + Math.cos(a), 0));
+    if (m < -Math.PI / 2) m += 2 * Math.PI;
+    return { id: sk.id, m, n: as.length };
+  }).sort((a, b) => a.m - b.m || a.id.localeCompare(b.id));
+  means.forEach((sk, i) => (pos[sk.id] = { a: (means[0]?.m || 0) + (2 * Math.PI * i) / (means.length || 1), r: R_S, n: sk.n }));
+
+  const gE = el("g", { class: "edges" }, svg), gS = el("g", { class: "skills" }, svg), gA = el("g", {}, svg), gFl = el("g", {}, svg), gF = el("g", {}, svg);
+  el("circle", { cx: 0, cy: 0, r: R_S, class: "hub" }, gS);
+  for (const e of skillEdges) {
+    const p = pos[e.from], q = pos[e.to];
+    if (!p || !q) continue;
+    const [x1, y1] = xy(p.a, p.r - 11), [x2, y2] = xy(q.a, q.r + 6);
+    const [cx, cy] = xy((p.a + q.a) / 2 + (Math.abs(p.a - q.a) > Math.PI ? Math.PI : 0), (p.r + q.r) / 2 - 40);
+    el("path", { d: `M${f1(x1)},${f1(y1)} Q${f1(cx)},${f1(cy)} ${f1(x2)},${f1(y2)}`, class: "edge" + (crossSkillIds.has(e.to) ? " cross" : ""), stroke: areaById[primary(byId[e.from])].color }, gE);
+  }
+  for (const sk of D.skills) {
+    const p = pos[sk.id], [x, y] = xy(p.a, p.r);
+    el("circle", { cx: f1(x), cy: f1(y), r: f1(4 + Math.min(p.n, 8) * 0.8), class: "skill" + (crossSkillIds.has(sk.id) ? " cross" : "") }, gS);
+  }
+  for (const f of order) {
+    const p = pos[f.id], [x, y] = xy(p.a, p.r);
+    el("circle", { cx: f1(x), cy: f1(y), r: 12, class: "fellow", fill: areaById[primary(f)].color }, gF);
+    const src = FLAGS[f.country];
+    if (src) { // small round flag just outside each fellow: which home market each of us brings
+      const [fx, fy] = xy(p.a, R_FLAG), g = el("g", { class: "flag" }, gFl), id = "c" + f.id;
+      const cp = el("clipPath", { id }, g); el("circle", { cx: f1(fx), cy: f1(fy), r: 13 }, cp);
+      el("image", { href: src, x: f1(fx - 17.5), y: f1(fy - 13), width: 35, height: 26, "clip-path": `url(#${id})`, preserveAspectRatio: "xMidYMid slice" }, g);
+      el("circle", { cx: f1(fx), cy: f1(fy), r: 13, class: "flagring" }, g);
+    }
+  }
+  for (const a of arcs) {
+    const c = areaById[a.id], [x0, y0] = xy(a.a0, R_ARC), [x1, y1] = xy(a.a1, R_ARC);
+    el("path", { d: `M${f1(x0)},${f1(y0)} A${R_ARC},${R_ARC} 0 ${a.a1 - a.a0 > Math.PI ? 1 : 0} 1 ${f1(x1)},${f1(y1)}`, class: "arc", stroke: c.color }, gA);
+    const mid = (a.a0 + a.a1) / 2, cos = Math.cos(mid), sin = Math.sin(mid), [lx, ly] = xy(mid, R_ARC + 26);
+    const t = el("text", { class: "label", x: f1(lx), y: f1(ly + sin * 12), "dominant-baseline": "middle", "text-anchor": cos > 0.3 ? "start" : cos < -0.3 ? "end" : "middle" }, gA);
+    t.textContent = c.label;
+  }
+  const core = el("g", { class: "core" }, svg);
+  const big = el("text", { class: "big", x: 0, y: 30, "text-anchor": "middle" }, core); big.textContent = String(FACT.n);
+  const sm = el("text", { class: "small", x: 0, y: 82, "text-anchor": "middle" }, core); sm.textContent = "bridges";
+  return svg;
+}
+
+function buildSlide(step) {
+  const slide = document.createElement("div");
+  slide.className = "slide";
+  slide.innerHTML = `<div class="band"></div><h1>What do<br>we offer?</h1><ol>${STEPS.map((s, i) =>
+    `<li class="${i < step ? "on" : ""}${i === step - 1 ? " cur" : ""}"><span class="n">${i + 1}</span><span class="t">${s.t}</span><span class="d">${s.d}</span></li>`).join("")}</ol>
+    <div class="gwrap"></div><div class="logo">AFRIKA KOMMT! 15</div>`;
+  slide.querySelector(".gwrap").appendChild(buildGraph(step));
+  return slide;
+}
+function fitInto(frame, node, w, h) {
+  frame.innerHTML = ""; frame.appendChild(node);
+  const fit = () => { node.style.transform = `scale(${frame.clientWidth / w})`; };
+  fit(); new ResizeObserver(fit).observe(frame);
+}
+
+// ---------- intro map ----------
+function buildMap() {
+  const wrap = document.createElement("div");
+  wrap.className = "slide";
+  const geo = window.AFRICA_GEO;
+  if (!geo || !window.d3) { wrap.textContent = "Map needs internet once (d3)."; return wrap; }
+  const W = 1920, H = 1080;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: "font-family:var(--font)" });
+  el("rect", { x: 0, y: 0, width: 760, height: H, fill: "#2d6a39" }, svg);
+  const proj = d3.geoMercator().fitExtent([[960, 50], [1600, 1030]], geo), path = d3.geoPath(proj);
+  for (const ft of geo.features) {
+    const home = countries[ft.properties.name];
+    el("path", { d: path(ft), fill: home ? "#2d6a39" : "#e6dfcf", stroke: "#faf7f0", "stroke-width": home ? 1.6 : 1 }, svg);
+  }
+  // labels sit in two columns beside the continent (west: Atlantic side, east: Indian Ocean side), joined by leader lines,
+  // so the crowded east-African cluster stays readable
+  const homes = geo.features.filter((ft) => countries[ft.properties.name]).map((ft) => {
+    const [cx, cy] = proj(d3.geoCentroid(ft));
+    return { name: ft.properties.name, n: countries[ft.properties.name], cx, cy };
+  });
+  const WEST = new Set(["Morocco", "Ghana", "Nigeria", "Cameroon"]);
+  for (const [side, x] of [["w", 860], ["e", 1730]]) {
+    const col = homes.filter((h) => WEST.has(h.name) === (side === "w")).sort((a, b) => a.cy - b.cy);
+    const top = 110, bottom = 990, gap = col.length > 1 ? (bottom - top) / (col.length - 1) : 0;
+    col.forEach((h, i) => {
+      const y = col.length > 1 ? top + gap * i : 540, r = 24 + h.n * 2.6;
+      el("line", { x1: h.cx, y1: h.cy, x2: x + (side === "w" ? r : -r), y2: y, stroke: "#1f4d29", "stroke-width": 2, opacity: .7 }, svg);
+      el("circle", { cx: h.cx, cy: h.cy, r: 5, fill: "#fff", stroke: "#1f4d29", "stroke-width": 2 }, svg);
+      el("circle", { cx: x, cy: y, r, fill: "#fff", stroke: "#1f4d29", "stroke-width": 3 }, svg);
+      const t = el("text", { x, y: y + 2, "text-anchor": "middle", "dominant-baseline": "middle", "font-size": 22 + h.n * 1.4, "font-weight": 800, fill: "#1f4d29" }, svg);
+      t.textContent = h.n;
+      const lab = el("text", { x, y: y + r + 26, "text-anchor": "middle", "font-size": 23, "font-weight": 700, fill: "#1d2a1f" }, svg);
+      lab.textContent = h.name;
+    });
+  }
+  const head = el("text", { x: 80, y: 250, fill: "#fff", "font-size": 150, "font-weight": 900 }, svg); head.textContent = String(FACT.n);
+  const l1 = el("text", { x: 84, y: 320, fill: "#fff", "font-size": 46, "font-weight": 800 }, svg); l1.textContent = "fellows";
+  const head2 = el("text", { x: 80, y: 560, fill: "#fff", "font-size": 150, "font-weight": 900 }, svg); head2.textContent = String(FACT.countries);
+  const l2 = el("text", { x: 84, y: 630, fill: "#fff", "font-size": 46, "font-weight": 800 }, svg); l2.textContent = "countries";
+  const l3 = el("text", { x: 84, y: 900, fill: "#fff", "font-size": 30, "font-weight": 600, opacity: .9 }, svg); l3.textContent = "One cohort:";
+  const l4 = el("text", { x: 84, y: 945, fill: "#fff", "font-size": 30, "font-weight": 600, opacity: .9 }, svg); l4.textContent = "AFRIKA KOMMT! 15";
+  wrap.appendChild(svg);
+  return wrap;
+}
+
+// ---------- script ----------
+function buildScript() {
+  const firms = FACT.firms.slice(0, 6).join(", ");
+  return `
+  <p class="cue">Handover from Kelvin: "…what do these people actually bring to the table? Well, that's exactly what we'd like to show you."</p>
+  <h3>Opening (slide shows the title only)</h3>
+  <p>We are not only here to learn. We came carrying something valuable: our own knowledge, skills and experience, shaped by different countries, industries and careers. Let me show you what that looks like.</p>
+  <h3>1 · Diversity</h3>
+  <p>Each dot is one of us. ${FACT.n} fellows, from ${FACT.countries} countries, across ${FACT.areas} areas of expertise: from data and AI to health, from engineering to finance, from sustainability to media and business growth.</p>
+  <h3>2 · Connected expertise</h3>
+  <p>What makes this group interesting is not only how different we are, but how we connect. ${FACT.bridging} of the ${FACT.n} of us share a skill with someone from a completely different area. Take <b>Luciana, a medical doctor coordinating a health programme in Tanzania</b>, and <b>Randy, an AI engineer and co-founder from Kenya</b>. Together they could rethink how care reaches a patient.</p>
+  <p>Five of us, in a sentence each: <span class="tbc">[Fellow 1: name, role, one achievement]</span> · <span class="tbc">[Fellow 2]</span> · <span class="tbc">[Fellow 3]</span> · <span class="tbc">[Fellow 4]</span> · <span class="tbc">[Fellow 5]</span>. <span class="cue">Pick people the outro doesn't use. Say each name with their role.</span></p>
+  <h3>3 · African perspectives</h3>
+  <p>We bring an understanding of the markets and realities in which businesses operate across Africa: ${FACT.countries} home markets in this room alone. And not only Africa: many of us have worked at global firms such as ${firms}. We know how a multinational works, and we know the ground it wants to reach.</p>
+  <h3>4 · Mutual exchange</h3>
+  <p>${FACT.cross} of our ${FACT.skills} skills cross areas. Expertise here doesn't sit in silos, and the same is true between us and you. We are here to learn, and also to contribute: fresh perspectives, honest questions, and connections that last beyond this programme.</p>
+  <h3>5 · 32 bridges</h3>
+  <p>So we are not just ${FACT.n} individuals from ${FACT.countries} countries. We are ${FACT.n} bridges: between Africa and Germany, and between disciplines. And this is what we offer.</p>
+  <p class="cue">Handover to Mwai: "And to build a bridge, you need to understand both banks. Mwai will take us into business culture across Africa."</p>`;
+}
+
+// ---------- page wiring ----------
+const EXPORTS = [
+  ...STEPS.map((s, i) => ({ f: `offer-slide-${i + 1}.png`, t: `Slide, step ${i + 1}: ${s.t}`, d: "Full 16:9 slide" })),
+  ...STEPS.map((s, i) => ({ f: `offer-graphic-${i + 1}.png`, t: `Graphic only, step ${i + 1}: ${s.t}`, d: "Transparent, 2160 × 2160" })),
+  { f: "intro-map.png", t: "Intro map: 11 countries", d: "Full 16:9 slide" },
+];
+
+if (RENDER) {
+  document.body.classList.add("render");
+  const host = document.getElementById("renderHost"), step = Math.max(1, Math.min(5, +qs.get("step") || 5));
+  if (RENDER === "slide") host.appendChild(buildSlide(step));
+  else if (RENDER === "graphic") { document.documentElement.style.background = "transparent"; host.style.cssText = "width:100vw;height:100vh;padding:2vh"; host.appendChild(buildGraph(step)); }
+  else if (RENDER === "map") host.appendChild(buildMap());
+  document.body.dataset.ready = "1";
+  return;
+}
+
+let step = 1;
+const frame = document.getElementById("slideFrame");
+function show() {
+  fitInto(frame, buildSlide(step), 1920, 1080);
+  document.getElementById("stepName").textContent = `${step} / 5 · ${STEPS[step - 1].t}`;
+  document.getElementById("prev").disabled = step === 1;
+  document.getElementById("next").disabled = step === 5;
+}
+// step changes animate: swap data-step and list classes in place instead of rebuilding
+function go(n) {
+  n = Math.max(1, Math.min(5, n));
+  if (n === step) return;
+  step = n;
+  const g = frame.querySelector("svg.graph");
+  g.setAttribute("data-step", step);
+  frame.querySelectorAll(".slide li").forEach((li, i) => { li.classList.toggle("on", i < step); li.classList.toggle("cur", i === step - 1); });
+  document.getElementById("stepName").textContent = `${step} / 5 · ${STEPS[step - 1].t}`;
+  document.getElementById("prev").disabled = step === 1;
+  document.getElementById("next").disabled = step === 5;
+}
+show();
+document.getElementById("prev").onclick = () => go(step - 1);
+document.getElementById("next").onclick = () => go(step + 1);
+addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight" || e.key === "PageDown") go(step + 1);
+  if (e.key === "ArrowLeft" || e.key === "PageUp") go(step - 1);
+});
+document.getElementById("svgBtn").onclick = () => {
+  const svg = buildGraph(step);
+  svg.setAttribute("xmlns", NS);
+  const css = [...document.styleSheets[document.styleSheets.length - 1].cssRules].map((r) => r.cssText).filter((t) => t.includes(".graph")).join("\n")
+    .replace(/var\(--skill\)/g, "#8d978e").replace(/var\(--line\)/g, "#ddd6c6").replace(/var\(--ink\)/g, "#1d2a1f").replace(/var\(--ink-2\)/g, "#56635a")
+    .replace(/var\(--cream\)/g, "#faf7f0").replace(/var\(--green\)/g, "#2d6a39").replace(/var\(--green-2\)/g, "#1f4d29").replace(/var\(--font\)/g, "Montserrat, Arial, sans-serif");
+  const style = document.createElementNS(NS, "style"); style.textContent = css; svg.insertBefore(style, svg.firstChild);
+  const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: "image/svg+xml" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `offer-graphic-${step}.svg`; a.click();
+};
+fitInto(document.getElementById("mapFrame"), buildMap(), 1920, 1080);
+document.getElementById("scriptBody").innerHTML = buildScript();
+document.getElementById("dlList").innerHTML = EXPORTS.map((x) => `<a href="export/${x.f}" download>${x.t}<span>${x.d} · ${x.f}</span></a>`).join("");
+})();
+</script>
+</body>
+</html>

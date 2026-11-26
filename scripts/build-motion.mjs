@@ -29,4 +29,11 @@ fs.writeFileSync(out, art);
 // /daph/: simplified light view of the areas of expertise (no names, no counts); reads ../data.js
 fs.mkdirSync(path.join(ROOT, "release", "daph"), { recursive: true });
 fs.copyFileSync(path.join(ROOT, "app", "daph.html"), path.join(ROOT, "release", "daph", "index.html"));
-console.log("release/daph/index.html +", "release/motion.html +", path.relative(ROOT, out), (art.length / 1024).toFixed(1) + " KB");
+// New presentation pages (originals above stay untouched): /offer/ (slide kit) and /baobab/ (motion story)
+fs.copyFileSync(path.join(ROOT, "app", "africa.js"), path.join(ROOT, "release", "africa.js"));
+for (const [src, dir] of [["offer.html", "offer"], ["baobab.html", "baobab"]]) {
+  if (!fs.existsSync(path.join(ROOT, "app", src))) continue;
+  fs.mkdirSync(path.join(ROOT, "release", dir), { recursive: true });
+  fs.copyFileSync(path.join(ROOT, "app", src), path.join(ROOT, "release", dir, "index.html"));
+}
+console.log("release/offer + release/baobab +", "release/daph/index.html +", "release/motion.html +", path.relative(ROOT, out), (art.length / 1024).toFixed(1) + " KB");

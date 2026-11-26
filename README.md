@@ -56,12 +56,16 @@ The page people see has three files, built locally from the approved data:
 
 ```bash
 node scripts/export.mjs release   # release/index.html + release/data.js
-node scripts/build-motion.mjs     # release/motion.html (the Africa-map story)
+node scripts/build-motion.mjs     # release/motion.html, daph/, offer/, baobab/, africa.js
 ```
 
 - `release/index.html`: the capability map, with "▶ Watch the story" linking to `motion.html`
 - `release/motion.html`: the scroll story, with "← Back to map" linking to `index.html`
 - `release/data.js`: the approved fellow data, the only file with personal data
+- `release/daph/`: a light, simplified areas graph (no names)
+- `release/offer/`: the presentation kit for the 4 Dec kick-off: the What We Offer slide in 5 build steps, the intro map, a script draft, and 4K exports in `release/offer/export/` (`node scripts/export-slides.mjs`, with `node scripts/serve.mjs release 8015` running)
+- `release/baobab/`: the baobab motion story (seed to fruit, 9 chapters, canvas)
+- `release/africa.js`: country shapes and flags used by `/offer/` and `/baobab/`
 
 **Current hosting:** GitHub Pages deploys `release/` on every push to `main` (`.github/workflows/pages.yml`), with every page marked `noindex`. The site is open to anyone who has the link.
 
