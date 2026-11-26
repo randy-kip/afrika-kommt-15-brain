@@ -22,8 +22,8 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: #0b120d; overflow: hidden; }
 body { font-family: var(--body); color: var(--ink); -webkit-font-smoothing: antialiased; }
-#app { position: fixed; inset: 0; display: grid; place-items: center; }
-#stage { width: 1920px; height: 1080px; position: relative; transform-origin: center center; background: var(--paper); overflow: hidden; box-shadow: 0 0 80px rgba(0,0,0,.5); }
+#app { position: fixed; inset: 0; overflow: hidden; }
+#stage { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; transform-origin: center center; background: var(--paper); overflow: hidden; box-shadow: 0 0 80px rgba(0,0,0,.5); }
 
 /* ---------- slides ---------- */
 .slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility 0s linear .7s; background: var(--paper); overflow: hidden; }
@@ -863,7 +863,7 @@ function fxLoop() {
 
 /* ================= navigation ================= */
 let idx = 0, step = 0, started = false;
-function fit() { const k = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `scale(${k})`; }
+function fit() { const k = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `translate(-50%, -50%) scale(${k})`; }
 addEventListener("resize", fit); fit();
 function applyStep(sl, s, fromEnter) {
   sl.el.querySelectorAll("[data-s]").forEach((e) => e.classList.toggle("on", s >= +e.dataset.s));
