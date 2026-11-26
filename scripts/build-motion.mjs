@@ -1,5 +1,6 @@
 // Builds the motion version from app/motion.html + release/data.js:
 //   release/motion.html                       local copy (needs internet once for d3 + fonts)
+//   release/daph/index.html                   simplified light view of the areas (copied from app/daph.html)
 //   restricted/artifacts/brain-motion.html    single file with data inlined, for publishing as an Artifact
 // Usage: node scripts/build-motion.mjs
 import fs from "node:fs";
@@ -25,4 +26,7 @@ if (art === tpl) throw new Error("data.js tag not found in template");
 const out = path.join(ROOT, "restricted", "artifacts", "brain-motion.html");
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, art);
-console.log("release/motion.html +", path.relative(ROOT, out), (art.length / 1024).toFixed(1) + " KB");
+// /daph/: simplified light view of the areas of expertise (no names, no counts); reads ../data.js
+fs.mkdirSync(path.join(ROOT, "release", "daph"), { recursive: true });
+fs.copyFileSync(path.join(ROOT, "app", "daph.html"), path.join(ROOT, "release", "daph", "index.html"));
+console.log("release/daph/index.html +", "release/motion.html +", path.relative(ROOT, out), (art.length / 1024).toFixed(1) + " KB");
