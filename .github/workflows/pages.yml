@@ -1,4 +1,4 @@
-# Publishes release/ (the map, the Africa-map story and the approved data) to GitHub Pages.
+# Publishes release/ (the map, the Africa-map story, /daph and the approved data) to GitHub Pages.
 # Temporary hosting: the site is public at its link, so every page is marked noindex.
 name: Deploy to GitHub Pages
 
@@ -26,8 +26,7 @@ jobs:
       - name: Ask search engines not to index the pages
         run: |
           for f in release/*.html release/*/*.html; do
-            grep -q 'name="robots"' "$f" || sed -i 's#<head>#<head>
-<meta name="robots" content="noindex, nofollow">#' "$f"
+            grep -q 'name="robots"' "$f" || sed -i 's#<head>#<head><meta name="robots" content="noindex, nofollow">#' "$f"
           done
           grep -c 'name="robots"' release/*.html release/*/*.html
       - uses: actions/configure-pages@v5
