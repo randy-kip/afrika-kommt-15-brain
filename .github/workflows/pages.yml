@@ -17,22 +17,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # build and deploy are separate jobs (GitHub's template): deploying in the same job right after the
+  # upload sometimes fails with "No artifacts named github-pages were found"
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ask search engines not to index the pages
+        run: |
+          for f in release/*.html release/*/*.html; do
+            grep -q 'name="robots"' "$f" || sed -i 's#<head>#<head>
+<meta name="robots" content="noindex, nofollow">#' "$f"
+          done
+          grep -c 'name="robots"' release/*.html release/*/*.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: release
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Ask search engines not to index the pages
-        run: |
-          for f in release/*.html; do
-            grep -q 'name="robots"' "$f" || sed -i 's#<head>#<head>\n<meta name="robots" content="noindex, nofollow">#' "$f"
-          done
-          grep -c 'name="robots"' release/*.html
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: release
       - id: deployment
         uses: actions/deploy-pages@v4
