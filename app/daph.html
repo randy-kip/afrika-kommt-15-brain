@@ -18,7 +18,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 28px 16px 24px; display: flex
 header { text-align: center; max-width: 720px; }
 .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
 h1 { font-size: clamp(24px, 4vw, 36px); line-height: 1.15; margin: 0 0 8px; }
-.lead { color: var(--ink-2); font-size: 16px; line-height: 1.5; margin: 0; }
+.nw { white-space: nowrap; }
+.lead { color: var(--ink-2); font-size: 18px; line-height: 1.5; margin: 0; }
 svg { width: min(100%, 860px); height: auto; margin-top: 8px; overflow: visible; }
 .edge { fill: none; stroke-width: 1.3; stroke-opacity: .45; transition: stroke-opacity .25s; }
 .arc { fill: none; stroke-width: 9; stroke-linecap: round; transition: opacity .25s; }
@@ -41,15 +42,15 @@ nav a:hover { text-decoration: underline; }
 <main>
   <header>
     <p class="eyebrow">AFRIKA KOMMT! 15 · What we offer</p>
-    <h1>Our main areas of expertise</h1>
-    <p class="lead">Each coloured dot is a fellow, grouped by their main area. The grey dots in the middle are shared skills. The lines show how our areas connect through them.</p>
+    <h1 id="headline">32 professionals. 8 areas of expertise. <span class="nw">One connected team.</span></h1>
+    <p class="lead" id="takeaway">31 of us share a skill with someone from a different area, so a challenge never sits with one field alone.</p>
   </header>
   <svg id="g" viewBox="-700 -520 1400 1040" role="img" aria-labelledby="gt gd">
     <title id="gt">Areas of expertise of the AFRIKA KOMMT! 15 cohort</title>
     <desc id="gd"></desc>
     <g id="edges"></g><g id="skills"></g><g id="arcs"></g><g id="fellows"></g>
   </svg>
-  <p class="note">Hover over an area to see where it connects.</p>
+  <p class="note">Each coloured dot is a fellow, grouped by their main area. Grey dots are shared skills; the lines show who brings them.<br>Hover over an area to see where it connects.</p>
   <nav><a href="../index.html">← Full map</a></nav>
 </main>
 <script src="../data.js"></script>
@@ -140,6 +141,12 @@ for (const a of arcs) {
   g.addEventListener("mouseleave", off); g.addEventListener("blur", off);
 }
 fellowEls.forEach(({ node, area }) => { node.addEventListener("mouseenter", () => focus(area)); node.addEventListener("mouseleave", () => focus(null)); });
+// headline and takeaway come from the data, so they stay true if the roster changes
+const byId = Object.fromEntries(D.fellows.map((f) => [f.id, f]));
+const bridging = D.fellows.filter((f) => skillEdges.some((e) => e.from === f.id && skillEdges.some((x) => x.to === e.to && byId[x.from] && primary(byId[x.from]) !== primary(f)))).length;
+const crossSkills = D.skills.filter((sk) => new Set(skillEdges.filter((e) => e.to === sk.id && byId[e.from]).map((e) => primary(byId[e.from]))).size >= 2).length;
+document.getElementById("headline").innerHTML = `${D.fellows.length} professionals. ${groups.length} areas of expertise. <span class="nw">One connected team.</span>`;
+document.getElementById("takeaway").textContent = `${bridging} of us share a skill with someone from a different area, and ${crossSkills} of our ${D.skills.length} skills cross areas. A challenge never sits with one field alone.`;
 svg.querySelector("#gd").textContent = `${D.fellows.length} fellows across ${groups.length} areas: ${groups.map((g) => areaById[g.k].label).join(", ")}. Lines link each fellow to the shared skills they bring.`;
 
 function focus(id) {
