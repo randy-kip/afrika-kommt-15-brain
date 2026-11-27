@@ -171,6 +171,7 @@ window.DECK_PHOTOS = {
  "F07": "photos/F07.jpg",
  "F08": "photos/F08.jpg",
  "F09": "photos/F09.jpg",
+ "F10": "photos/F10.jpg",
  "F11": "photos/F11.jpg",
  "F12": "photos/F12.jpg",
  "F13": "photos/F13.jpg",
