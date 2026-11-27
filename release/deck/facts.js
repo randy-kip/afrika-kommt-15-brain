@@ -161,4 +161,36 @@ window.DECK_FACTS = {
   "serious": "Closed $1M+ deals at PwC and founded SmartShelf AI, a retail AI start-up."
  }
 };
-window.DECK_PHOTOS = {};
+window.DECK_PHOTOS = {
+ "F01": "photos/F01.jpg",
+ "F02": "photos/F02.jpg",
+ "F03": "photos/F03.jpg",
+ "F04": "photos/F04.jpg",
+ "F05": "photos/F05.jpg",
+ "F06": "photos/F06.jpg",
+ "F07": "photos/F07.jpg",
+ "F08": "photos/F08.jpg",
+ "F09": "photos/F09.jpg",
+ "F11": "photos/F11.jpg",
+ "F12": "photos/F12.jpg",
+ "F13": "photos/F13.jpg",
+ "F14": "photos/F14.jpg",
+ "F15": "photos/F15.jpg",
+ "F16": "photos/F16.jpg",
+ "F17": "photos/F17.jpg",
+ "F18": "photos/F18.jpg",
+ "F19": "photos/F19.jpg",
+ "F20": "photos/F20.jpg",
+ "F21": "photos/F21.jpg",
+ "F22": "photos/F22.jpg",
+ "F23": "photos/F23.jpg",
+ "F24": "photos/F24.jpg",
+ "F25": "photos/F25.jpg",
+ "F26": "photos/F26.jpg",
+ "F27": "photos/F27.jpg",
+ "F28": "photos/F28.jpg",
+ "F29": "photos/F29.jpg",
+ "F30": "photos/F30.jpg",
+ "F31": "photos/F31.jpg",
+ "F32": "photos/F32.jpg"
+};

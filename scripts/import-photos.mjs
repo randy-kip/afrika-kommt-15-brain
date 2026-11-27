@@ -35,8 +35,12 @@ for (const file of files.sort()) {
   if (used[f.id]) { report.push(`skip (already have ${f.id}): ${path.basename(file)}`); continue; }
   const dst = path.join(out, `${f.id}.jpg`);
   // square crop biased to the upper part of the frame (faces), 480px
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", file, "-frames:v", "1", "-vf",
+  // HEIC is a tiled image that ffmpeg exposes through a complex filtergraph: flatten it to PNG first
+  let input = file;
+  if (/.(heic|heif)$/i.test(file)) { input = path.join(out, `${f.id}.tmp.png`); execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", file, "-frames:v", "1", input]); }
+  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", input, "-frames:v", "1", "-vf",
     "crop='min(iw,ih)':'min(iw,ih)':'(iw-min(iw,ih))/2':'(ih-min(iw,ih))*0.2',scale=480:480", "-q:v", "3", dst]);
+  if (input !== file) fs.rmSync(input);
   used[f.id] = path.basename(file);
   report.push(`${f.id} ${f.name}  <=  ${path.basename(file)}`);
 }

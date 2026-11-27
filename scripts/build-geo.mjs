@@ -28,8 +28,10 @@ const clean = (g) => {
 };
 
 const all = topojson.feature(topo, topo.objects.countries).features;
-const features = all.filter((f) => AFRICA.has(f.id) || f.properties.name === "Somaliland")
+import { clipMorocco } from "./geo-clip.mjs";
+const features0 = all.filter((f) => AFRICA.has(f.id) || f.properties.name === "Somaliland")
   .map((f) => ({ type: "Feature", properties: { name: f.properties.name }, geometry: clean(f.geometry) }));
+const features = clipMorocco({ features: features0 }).features;
 for (const name of Object.keys(HOME)) if (!features.some((f) => f.properties.name === name)) throw new Error("missing shape: " + name);
 
 const flags = {};
