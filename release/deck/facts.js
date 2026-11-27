@@ -78,7 +78,7 @@ window.DECK_FACTS = {
  "F16": {
   "short": "Annie",
   "fun": "Annie has twice attempted a one-day dash up the mountain; third time’s the charm.",
-  "serious": "Raised trade straight-through processing from 57% to 90% across 11 markets at Citi."
+  "serious": "Payments infrastructure at Citi in 11 sub-Saharan markets and the UK; raised trade straight-through processing from 57% to 90%."
  },
  "F17": {
   "short": "Vivian",
@@ -123,7 +123,7 @@ window.DECK_FACTS = {
  "F25": {
   "short": "Debby",
   "fun": "Debby can create almost anything.",
-  "serious": "Pharmacist and Product Manager for digital health and operations at Medplus Pharmacy."
+  "serious": "Helped launch a telemedicine portal and an AI medicines assistant across West Africa’s largest pharmacy chain (160+ stores)."
  },
  "F26": {
   "short": "Amos",
