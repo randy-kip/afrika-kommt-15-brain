@@ -12,7 +12,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const rel = (...p) => path.join(ROOT, "release", ...p);
 fs.mkdirSync(rel("deck", "photos"), { recursive: true });
 fs.mkdirSync(rel("hub"), { recursive: true });
-fs.copyFileSync(path.join(ROOT, "app", "deck.html"), rel("deck", "index.html"));
+// cache-bust the data scripts so a presenter never gets yesterday's photos or map (Pages caches for 10 min)
+const V = Date.now().toString(36);
+fs.writeFileSync(rel("deck", "index.html"), fs.readFileSync(path.join(ROOT, "app", "deck.html"), "utf8").replace(/src="((?:\.\.\/)?[a-z]+\.js)"/g, (m, f) => `src="${f}?v=${V}"`));
 fs.copyFileSync(path.join(ROOT, "app", "hub.html"), rel("hub", "index.html"));
 
 const factsPath = path.join(ROOT, "restricted", "context", "09-fellow-facts.json");
