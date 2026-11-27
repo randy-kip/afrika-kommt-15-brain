@@ -28,10 +28,11 @@ const clean = (g) => {
 };
 
 const all = topojson.feature(topo, topo.objects.countries).features;
-import { clipMorocco } from "./geo-clip.mjs";
-const features0 = all.filter((f) => AFRICA.has(f.id) || f.properties.name === "Somaliland")
-  .map((f) => ({ type: "Feature", properties: { name: f.properties.name }, geometry: clean(f.geometry) }));
-const features = clipMorocco({ features: features0 }).features;
+// Morocco is shown as one shape that includes Western Sahara (team decision, 27 Nov): dissolve the two with topojson.merge so no border line is drawn between them.
+const geoms = topo.objects.countries.geometries;
+const moroccoMerged = topojson.merge(topo, geoms.filter((g) => g.id === "504" || g.id === "732"));
+const features = all.filter((f) => (AFRICA.has(f.id) || f.properties.name === "Somaliland") && f.id !== "732")
+  .map((f) => ({ type: "Feature", properties: { name: f.properties.name }, geometry: clean(f.id === "504" ? moroccoMerged : f.geometry) }));
 for (const name of Object.keys(HOME)) if (!features.some((f) => f.properties.name === name)) throw new Error("missing shape: " + name);
 
 const flags = {};

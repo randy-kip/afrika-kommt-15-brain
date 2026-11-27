@@ -219,13 +219,13 @@ html.still *, html.still *::after { transition: none !important; animation-durat
   <button data-a="next" title="Next (→ / space)">→</button>
   <button data-a="grid" title="All slides (G)">Slides</button>
   <button data-a="notes" title="Speaker notes (N)">Notes</button>
-  <button data-a="mute" title="Sound (M)" id="muteBtn">Sound on</button>
+  <button data-a="mute" title="Sound (M)" id="muteBtn">Sound off</button>
   <button data-a="fs" title="Full screen (F)">Full screen</button>
   <a href="../hub/" style="color:#fff;opacity:.7;text-decoration:none;padding:0 6px">All pages</a>
 </div>
 <div id="notes"></div>
 <div id="grid"></div>
-<div id="start"><div><b>AFRIKA KOMMT! 15</b><span>Click or press <kbd>Space</kbd> to begin (this turns the sound on).<br><kbd>→</kbd> next · <kbd>←</kbd> back · <kbd>F</kbd> full screen · <kbd>G</kbd> all slides · <kbd>B</kbd> blank screen · <kbd>M</kbd> sound</span></div></div>
+<div id="start"><div><b>AFRIKA KOMMT! 15</b><span>Click or press <kbd>Space</kbd> to begin. Sound is off; press <kbd>M</kbd> to turn it on.<br><kbd>→</kbd> next · <kbd>←</kbd> back · <kbd>F</kbd> full screen · <kbd>G</kbd> all slides · <kbd>B</kbd> blank screen · <kbd>M</kbd> sound</span></div></div>
 
 <script src="../data.js"></script>
 <script src="../africa.js"></script>
@@ -420,7 +420,7 @@ function countUp(root) {
 function resetCounts(root) { root.querySelectorAll("[data-count]").forEach((el) => { delete el.dataset.done; el.textContent = (el.dataset.pre || "") + "0" + (el.dataset.suf || ""); }); }
 
 /* ================= sound (synthesised, no samples) ================= */
-let AC = null, muted = false;
+let AC = null, muted = !new URLSearchParams(location.search).has("sound"); // sound is off until someone turns it on (M or the Sound button), or open with ?sound
 const ac = () => (AC = AC || new (window.AudioContext || window.webkitAudioContext)());
 function deepNote() { // cinematic attention swell: a cloud of saws gliding into a wide D chord
   if (muted) return; const a = ac(), t = a.currentTime, out = a.createGain(), lp = a.createBiquadFilter();
@@ -436,7 +436,7 @@ function deepNote() { // cinematic attention swell: a cloud of saws gliding into
     o.start(t); o.stop(t + 9.8);
   }
 }
-function ding(hi = 1) { return; // all sounds off except the cold open (26 Nov feedback)
+function ding(hi = 1) {
   if (muted || !AC) return; const a = ac(), t = a.currentTime;
   [880 * hi, 1318.5 * hi].forEach((f, i) => { const o = a.createOscillator(), g = a.createGain(); o.type = "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + i * .09); g.gain.exponentialRampToValueAtTime(0.18, t + i * .09 + .02); g.gain.exponentialRampToValueAtTime(0.0001, t + i * .09 + 1.1); o.connect(g); g.connect(a.destination); o.start(t + i * .09); o.stop(t + i * .09 + 1.2); }); }
 function whoosh() { if (muted || !AC) return; const a = ac(), t = a.currentTime, n = a.sampleRate * .5, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
@@ -945,6 +945,7 @@ function go(i, s = 0, dir = 1) {
   const prev = S[idx];
   if (i !== idx || !prev.el.classList.contains("active")) {
     prev.el.classList.remove("active");
+    if (started && i !== idx) whoosh();
     const sl = S[i];
     resetCounts(sl.el);
     sl.el.querySelectorAll(".in").forEach((e) => { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
@@ -980,7 +981,8 @@ function begin() { started = true; document.getElementById("start").remove(); tr
 })();
 function toggle(c) { document.body.classList.toggle(c); }
 function fs() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
-function mute() { muted = !muted; document.getElementById("muteBtn").textContent = muted ? "Sound off" : "Sound on"; }
+function mute() { muted = !muted; if (!muted) { try { ac().resume(); } catch (e) {} } document.getElementById("muteBtn").textContent = muted ? "Sound off" : "Sound on"; }
+if (!muted) document.getElementById("muteBtn").textContent = "Sound on";
 addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key;
