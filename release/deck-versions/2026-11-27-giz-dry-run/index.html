@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>AK15 Presentation Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Noto+Sans+Ethiopic:wght@700&family=Noto+Sans+Arabic:wght@800&display=swap" rel="stylesheet">
+<style>
+/* Theme taken from the team's Canva deck "AFRIKA KOMMT - Presentation": forest green panels,
+   cream/white paper, olive-gold accent, heavy tight grotesk headlines, knockout country names. */
+:root {
+  color-scheme: light;
+  --green: #2d6a39; --green-2: #1f4d29; --green-3: #173b20; --green-soft: #e3ede0;
+  --paper: #fdfbf6; --cream: #f6f1e5; --ink: #1c2a1f; --ink-2: #5a675d; --line: #ddd5c3;
+  --gold: #a8924a; --gold-2: #d8bf6a; --gold-soft: #f1e8cc; --red: #c0392b;
+  --head: "Inter Tight", "Segoe UI", system-ui, Arial, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #0b120d; overflow: hidden; }
+body { font-family: var(--body); color: var(--ink); -webkit-font-smoothing: antialiased; }
+#app { position: fixed; inset: 0; overflow: hidden; }
+#stage { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; transform-origin: center center; background: var(--paper); overflow: hidden; box-shadow: 0 0 80px rgba(0,0,0,.5); }
+
+/* ---------- slides ---------- */
+.slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility 0s linear .7s; background: var(--paper); overflow: hidden; }
+.slide:not(.near) { display: none; }
+.slide.active { opacity: 1; visibility: visible; transition: opacity .7s ease, visibility 0s; z-index: 2; }
+.slide.dark { background: var(--green-3); color: #fff; }
+.slide.green { background: var(--green); color: #fff; }
+.slide.black { background: #000; color: #fff; }
+.slide.cream { background: var(--cream); }
+
+/* build steps: [data-s="n"] shows from step n; [data-x="n"] hides from step n */
+[data-s] { opacity: 0; transform: translateY(34px); transition: opacity .75s cubic-bezier(.2,.8,.2,1), transform .75s cubic-bezier(.2,.8,.2,1); transition-delay: var(--d, 0s); }
+[data-s].on { opacity: 1; transform: none; }
+[data-s][data-fx="pop"] { transform: scale(.6); }
+[data-s][data-fx="pop"].on { transform: none; transition-timing-function: cubic-bezier(.34,1.56,.64,1); }
+[data-s][data-fx="left"] { transform: translateX(-60px); }
+[data-s][data-fx="right"] { transform: translateX(60px); }
+[data-s][data-fx="blur"] { transform: scale(1.06); } /* was a blur filter: too heavy on presenter laptops */
+[data-s][data-fx="blur"].on { transform: none; }
+.slide.near { will-change: opacity; }
+.slide.near [data-s], .slide.near [data-x] { will-change: opacity, transform; }
+[data-s][data-fx="fade"] { transform: none; }
+[data-x] { transition: opacity .6s, transform .6s; }
+[data-x].off { opacity: .0; pointer-events: none; }
+[data-x].dim { opacity: .22; }
+.slide.active .in { animation: rise 1s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d, .15s); }
+@keyframes rise { from { opacity: 0; transform: translateY(40px); } }
+
+/* ---------- type ---------- */
+.h { font-family: var(--head); font-weight: 900; letter-spacing: -.045em; line-height: .92; margin: 0; }
+.h.xl { font-size: 200px; } .h.l { font-size: 136px; } .h.m { font-size: 96px; } .h.s { font-size: 64px; } .h.xs { font-size: 44px; letter-spacing: -.03em; line-height: 1; }
+.kick { font-family: var(--head); font-weight: 800; font-size: 24px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+.lead { font-size: 34px; line-height: 1.38; color: var(--ink-2); font-weight: 500; }
+.dark .lead, .green .lead, .black .lead { color: rgba(255,255,255,.82); }
+.gold { color: var(--gold); } .g { color: var(--green); }
+.abs { position: absolute; }
+.brand { position: absolute; right: 64px; bottom: 44px; font-family: var(--head); font-weight: 900; font-size: 22px; letter-spacing: .02em; color: var(--green); opacity: .9; z-index: 5; }
+.brand i { font-style: normal; color: var(--red); }
+.dark .brand, .green .brand, .black .brand { color: rgba(255,255,255,.75); }
+.secno { position: absolute; left: 64px; bottom: 44px; font-family: var(--head); font-weight: 800; font-size: 20px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-2); z-index: 5; }
+.dark .secno, .green .secno, .black .secno { color: rgba(255,255,255,.55); }
+.rule { height: 3px; background: var(--green); border-radius: 2px; }
+
+/* ---------- panels ---------- */
+.panel-l { position: absolute; left: 0; top: 0; bottom: 0; background: var(--green); }
+.panel-r { position: absolute; right: 0; top: 0; bottom: 0; background: var(--green); }
+.card { background: #fff; border-radius: 26px; box-shadow: 0 14px 50px rgba(23,59,32,.12); }
+.chip { display: inline-flex; align-items: center; gap: 10px; padding: 12px 26px; border-radius: 999px; font: 700 26px var(--head); background: var(--green-soft); color: var(--green-2); }
+.dark .chip, .green .chip { background: rgba(255,255,255,.12); color: #fff; }
+
+/* ---------- welcome ---------- */
+.greet { position: absolute; font-family: var(--head); font-weight: 900; font-size: 84px; letter-spacing: -.03em; color: #fff; transition: opacity .9s, transform .9s, filter .9s; text-shadow: 0 6px 40px rgba(0,0,0,.35); white-space: nowrap; }
+.greet small { display: block; font: 600 22px var(--body); letter-spacing: .08em; color: var(--gold-2); text-transform: uppercase; margin-top: 6px; text-shadow: none; }
+.greet.gone { opacity: 0 !important; filter: blur(10px); transform: scale(.94); }
+.greet.am { font-family: "Noto Sans Ethiopic", var(--head); }
+.greet.ar { font-family: "Noto Sans Arabic", var(--head); }
+
+/* ---------- baobab svg ---------- */
+svg.bb { overflow: visible; }
+svg.bb .trunk { fill: url(#barkG); }
+svg.bb .limb { fill: none; stroke: #6f5a45; stroke-linecap: round; }
+svg.bb .leaf { transition: opacity .6s, transform .6s; transform-box: fill-box; transform-origin: center; }
+svg.bb .root { fill: none; stroke: #7a6248; stroke-linecap: round; opacity: .45; }
+svg.bb .fruit { fill: #b7a35d; stroke: #8a7a40; stroke-width: 2; }
+.ground-line { position: absolute; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, rgba(168,146,74,.6), transparent); }
+
+/* ---------- map ---------- */
+svg.map path.c { fill: #dfe6dc; stroke: #fff; stroke-width: 1.2; transition: fill .8s, opacity .8s; }
+.dark svg.map path.c, .green svg.map path.c, .black svg.map path.c { fill: rgba(255,255,255,.12); stroke: rgba(255,255,255,.22); }
+svg.map path.c.hl { fill: var(--green); }
+.dark svg.map path.c.hl, .green svg.map path.c.hl, .black svg.map path.c.hl { fill: var(--gold-2); }
+svg.map path.c.focus { fill: var(--gold) !important; }
+svg.map .pin circle { fill: #fff; stroke: var(--green); stroke-width: 4; }
+svg.map .pin text { font: 900 34px var(--head); fill: var(--green-2); text-anchor: middle; dominant-baseline: central; }
+svg.map .lab { font: 700 22px var(--head); fill: var(--ink); }
+.dark svg.map .lab, .green svg.map .lab { fill: #fff; }
+
+/* ---------- game ---------- */
+.round { position: absolute; left: 64px; top: 56px; display: flex; gap: 14px; align-items: center; z-index: 4; }
+.round b { font: 900 26px var(--head); letter-spacing: .14em; text-transform: uppercase; }
+.round .pips { display: flex; gap: 7px; }
+.round .pips i { width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,.12); }
+.round .pips i.done { background: var(--gold); } .round .pips i.now { background: var(--green); box-shadow: 0 0 0 4px rgba(45,106,57,.25); }
+.dark .round .pips i { background: rgba(255,255,255,.18); } .dark .round .pips i.now { background: #fff; }
+.clue { display: flex; gap: 34px; align-items: flex-start; }
+.clue .n { flex: none; width: 92px; height: 92px; border-radius: 26px; background: var(--green); color: #fff; font: 900 50px/92px var(--head); text-align: center; }
+.clue p { margin: 6px 0 0; font: 700 48px/1.18 var(--head); letter-spacing: -.02em; color: var(--ink); }
+.dark .clue p { color: #fff; } .dark .clue .n { background: var(--gold); }
+.timer { position: absolute; width: 190px; height: 190px; }
+.timer svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.timer circle { fill: none; stroke-width: 14; }
+.timer .bg { stroke: rgba(0,0,0,.08); } .dark .timer .bg { stroke: rgba(255,255,255,.14); }
+.timer .fg { stroke: var(--gold); stroke-linecap: round; stroke-dasharray: 534; stroke-dashoffset: 0; }
+.timer.on .fg { animation: tick 10s linear forwards; }
+@keyframes tick { to { stroke-dashoffset: 534; } }
+.timer span { position: absolute; inset: 0; display: grid; place-items: center; font: 900 30px var(--head); letter-spacing: .1em; }
+.knock { font-family: var(--head); font-weight: 900; letter-spacing: -.05em; line-height: .86; display: inline-block; color: inherit; }
+.slide.cream .knock, .slide:not(.dark):not(.green):not(.black) .knock { color: var(--green-2); }
+.flagstrip { height: 26px; width: 520px; border-radius: 6px; margin-top: 22px; background-size: cover; background-position: center; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+.reveal-wrap { position: absolute; inset: 0; }
+.bignum { font: 900 300px/0.85 var(--head); letter-spacing: -.06em; color: var(--green); }
+.dark .bignum { color: #fff; }
+.tf { display: inline-block; padding: 10px 26px; border-radius: 14px; font: 900 40px var(--head); letter-spacing: .1em; border: 5px solid currentColor; transform: rotate(-6deg); color: var(--green); }
+.beat { width: 120px; height: 120px; border-radius: 50%; background: var(--gold); animation: beat .27s ease-out infinite; }
+@keyframes beat { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(216,191,106,.7); } 30% { transform: scale(1.18); } 100% { transform: scale(1); box-shadow: 0 0 0 60px rgba(216,191,106,0); } }
+
+/* ---------- fellows ---------- */
+.fgrid { position: absolute; display: grid; gap: 30px; }
+.fcard { background: #fff; border-radius: 30px; box-shadow: 0 16px 50px rgba(23,59,32,.14); padding: 34px 34px 52px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.fcard .ph { width: 190px; height: 190px; border-radius: 50%; margin: 0 auto 22px; position: relative; flex: none; }
+.fcard .ph img, .fcard .ph .ini { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; border: 6px solid #fff; box-shadow: 0 0 0 4px var(--green); background: var(--green-soft); }
+.fcard .ph .ini { display: grid; place-items: center; font: 900 70px var(--head); color: var(--green); letter-spacing: -.04em; }
+.fcard.on .ph::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 4px solid var(--gold); animation: ring 1.6s ease-out .3s 2; opacity: 0; }
+@keyframes ring { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.35); } }
+.fcard h3 { margin: 0; text-align: center; font: 900 46px/1 var(--head); letter-spacing: -.035em; color: var(--green-2); }
+.fcard .role { text-align: center; font: 600 20px/1.35 var(--body); color: var(--ink-2); margin: 10px 0 18px; min-height: 54px; }
+.fcard .fact { display: flex; gap: 14px; align-items: flex-start; font: 500 22px/1.38 var(--body); color: var(--ink); margin-top: 12px; }
+.fcard .fact i { flex: none; font-style: normal; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font: 800 18px var(--head); margin-top: 1px; }
+.fcard .fact.fun i { background: var(--gold-soft); color: var(--gold); }
+.fcard .fact.ser i { background: var(--green-soft); color: var(--green); }
+.fcard .stand { position: absolute; bottom: 16px; left: 0; right: 0; text-align: center; font: 800 15px var(--head); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); opacity: 0; transition: opacity .5s .9s; }
+.fcard.on .stand { opacity: 1; }
+.fcard.compact { padding: 26px 26px 56px; min-height: 580px; }
+.fcard.compact .ph { width: 140px; height: 140px; margin-bottom: 16px; }
+.fcard.compact h3 { font-size: 36px; }
+.fcard.compact .role { font-size: 17px; min-height: 46px; margin: 8px 0 10px; }
+.fcard.compact .fact { font-size: 18px; margin-top: 8px; }
+.fcard.compact .fact i { width: 30px; height: 30px; font-size: 15px; }
+
+/* ---------- misc ---------- */
+.stat { font: 900 150px/0.9 var(--head); letter-spacing: -.055em; color: var(--green); }
+.stat-l { font: 600 26px/1.3 var(--body); color: var(--ink-2); margin-top: 14px; }
+.dark .stat, .green .stat { color: #fff; } .dark .stat-l, .green .stat-l { color: rgba(255,255,255,.75); }
+.pillar { border-top: 4px solid var(--green); padding-top: 22px; }
+.pillar h4 { margin: 0 0 10px; font: 800 36px var(--head); letter-spacing: -.02em; color: var(--green-2); }
+.pillar p { margin: 0; font: 500 24px/1.4 var(--body); color: var(--ink-2); }
+.tl-node { position: absolute; width: 330px; margin-left: -165px; margin-top: -20px; text-align: center; }
+.tl-node .dot { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 7px solid var(--gold); margin: 0 auto 18px; }
+.tl-node b { display: block; font: 900 44px var(--head); letter-spacing: -.03em; }
+.tl-node span { font: 600 22px var(--body); opacity: .75; }
+.step6 { position: absolute; width: 270px; text-align: center; transform: translateX(-50%); }
+.step6 .badge { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 18px; display: grid; place-items: center; font: 900 52px var(--head); background: var(--green-soft); color: var(--green); border: 5px solid #fff; box-shadow: 0 8px 26px rgba(23,59,32,.18); transition: background .6s, color .6s, transform .6s; }
+.step6.on .badge { background: var(--green); color: #fff; transform: scale(1.08); }
+.step6 > :not(.badge) { position: relative; background: var(--paper); border-radius: 8px; }
+.step6 h5 { margin: 0 0 8px; font: 800 24px/1.18 var(--head); color: var(--green-2); }
+.step6 .co { font: 800 20px var(--head); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.step6 .num { font: 600 19px/1.35 var(--body); color: var(--ink-2); }
+.step6 > :not(.badge) { transition: opacity .5s; }
+.step6:not(.on) > :not(.badge) { opacity: 0; }
+.unv { display: none; }
+body.notes-on .unv { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 6px; background: #f3c969; color: #4a3600; font: 700 13px var(--body); }
+iframe.offer { position: absolute; inset: 0; width: 1920px; height: 1080px; border: 0; opacity: 0; transition: opacity .6s; }
+iframe.offer.on { opacity: 1; }
+canvas.fx { position: absolute; inset: 0; width: 1920px; height: 1080px; pointer-events: none; }
+
+/* ---------- HUD / notes / grid ---------- */
+#hud { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; z-index: 20; font: 600 13px var(--body); color: #fff; background: rgba(10,20,12,.72); padding: 8px 14px; border-radius: 999px; opacity: 0; transition: opacity .4s; backdrop-filter: blur(6px); }
+body.hud-show #hud, #hud:hover { opacity: 1; }
+#hud button { font: 700 13px var(--body); color: #fff; background: rgba(255,255,255,.12); border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; }
+#hud button:hover { background: rgba(255,255,255,.25); }
+#hud .pos { min-width: 150px; text-align: center; opacity: .9; }
+#progress { position: fixed; left: 0; bottom: 0; height: 4px; background: var(--gold-2); z-index: 21; transition: width .5s; }
+#notes { position: fixed; left: 0; right: 0; bottom: 0; max-height: 38vh; overflow: auto; z-index: 19; background: rgba(12,22,14,.94); color: #eef3ec; font: 400 17px/1.55 var(--body); padding: 18px 28px 60px; display: none; border-top: 3px solid var(--gold-2); }
+body.notes-on #notes { display: block; }
+body:not(.presenter) #notes, body:not(.presenter) [data-a="notes"], body:not(.presenter) .unv { display: none !important; }
+#notes h6 { margin: 0 0 6px; font: 800 13px var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--gold-2); }
+#notes p { margin: 0 0 8px; max-width: 1100px; }
+#notes b { color: #fff; }
+#grid { position: fixed; inset: 0; z-index: 30; background: rgba(8,16,10,.96); color: #fff; overflow: auto; display: none; padding: 34px 40px 80px; font-family: var(--body); }
+body.grid-on #grid { display: block; }
+#grid h2 { font: 900 34px var(--head); margin: 0 0 4px; letter-spacing: -.02em; }
+#grid .help { opacity: .7; margin: 0 0 24px; font-size: 14px; }
+#grid section { margin: 0 0 22px; }
+#grid h3 { font: 800 14px var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--gold-2); margin: 0 0 10px; }
+#grid .items { display: flex; flex-wrap: wrap; gap: 8px; }
+#grid button { font: 600 14px var(--body); color: #fff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 9px 12px; cursor: pointer; text-align: left; }
+#grid button.cur { background: var(--green); border-color: var(--gold-2); }
+#grid button:hover { background: rgba(255,255,255,.18); }
+#start { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: #000; color: #fff; cursor: pointer; text-align: center; font-family: var(--body); }
+#start b { display: block; font: 900 46px var(--head); letter-spacing: -.02em; margin-bottom: 14px; }
+#start span { opacity: .65; font-size: 17px; line-height: 1.7; }
+#start kbd { font: 700 13px var(--body); border: 1px solid rgba(255,255,255,.4); border-radius: 6px; padding: 2px 7px; }
+html.still *, html.still *::after { transition: none !important; animation-duration: 0s !important; animation-delay: 0s !important; }
+@media (prefers-reduced-motion: reduce) { [data-s], .slide { transition-duration: .01s !important; } .beat { animation: none; } }
+</style>
+</head>
+<body>
+<div id="app"><div id="stage"></div></div>
+<div id="progress"></div>
+<div id="hud">
+  <button data-a="prev" title="Back (←)">←</button>
+  <span class="pos" id="pos"></span>
+  <button data-a="next" title="Next (→ / space)">→</button>
+  <button data-a="grid" title="All slides (G)">Slides</button>
+  <button data-a="notes" title="Speaker notes (N)">Notes</button>
+  <button data-a="mute" title="Sound (M)" id="muteBtn">Sound off</button>
+  <button data-a="fs" title="Full screen (F)">Full screen</button>
+  <a href="../../hub/" style="color:#fff;opacity:.7;text-decoration:none;padding:0 6px">All pages</a>
+</div>
+<div id="notes"></div>
+<div id="grid"></div>
+<div id="start"><div><b>AFRIKA KOMMT! 15</b><span>Click or press <kbd>Space</kbd> to begin. Sound is off; press <kbd>M</kbd> to turn it on.<br><kbd>→</kbd> next · <kbd>←</kbd> back · <kbd>F</kbd> full screen · <kbd>G</kbd> all slides · <kbd>B</kbd> blank screen · <kbd>M</kbd> sound</span></div></div>
+
+<script src="data.js?v=mwyyl0u4"></script>
+<script src="africa.js?v=mwyyl0u4"></script>
+<script src="facts.js?v=mwyyl0u4"></script>
+<script>
+(() => {
+"use strict";
+const D = window.BRAIN_DATA || { fellows: [] };
+const GEO = window.AFRICA_GEO || { features: [] };
+const FLAGS = window.AFRICA_FLAGS || {};
+const FACTS = window.DECK_FACTS || {};
+const PHOTOS = window.DECK_PHOTOS || {};
+const stage = document.getElementById("stage");
+const STILL = /[?&]still/.test(location.search); // screenshot mode: no tweens
+if (STILL) document.documentElement.classList.add("still");
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+/* ================= data ================= */
+const NICK = { F01: "Muna", F07: "Noble", F10: "Udoka", F11: "Mwai", F24: "Hannah", F25: "Debby", F28: "Busayomi", F16: "Annie", F18: "Meaza", F19: "Edwin", F31: "Nana Akua" };
+const fellows = D.fellows.map((f) => {
+  const x = FACTS[f.id] || {};
+  const short = x.short || NICK[f.id] || f.name.split(/\s+/)[0];
+  return { ...f, short, fun: x.fun !== undefined ? x.fun : f.beyond_cv, serious: x.serious || null, photo: PHOTOS[f.id] || null };
+});
+const OFFICIAL = { F01: "Mayimuna Kizza Lugonvu", F07: "Chikaodiri Enyinnaya", F11: "Mwaiwathu Ziva Chapweteka", F14: "Oluwatooni Adedeji", F17: "Vivian Alice Okeyo", F24: "Hannah Kibret", F28: "Busayomi Thompson-Ajayi", F31: "Nana Akua Kwakyi" };
+fellows.forEach((f) => { f.full = OFFICIAL[f.id] || f.name; });
+const byCountry = {};
+for (const f of fellows) (byCountry[f.country] = byCountry[f.country] || []).push(f);
+const COUNT = (c) => (byCountry[c] || []).length;
+
+/* Game order and facts: from the Google Doc "COUNTRY AND FELLOW FACTS" (Kelvin + Agnes). Formats vary so 11 rounds don't repeat. */
+const ROUNDS = [
+  { c: "Cameroon", fmt: "nickname", region: "Central Africa", nick: "“Africa in Miniature”",
+    clues: ["Locals call it “Le Continent”.", "Rainforest, savannah, mountains, coast, and hundreds of languages, all in one country."] },
+  { c: "Egypt", fmt: "number", region: "North Africa", num: 7000, unit: "years", line: "of recorded history, one of the oldest continuous civilisations on Earth." },
+  { c: "Malawi", fmt: "number", region: "Southern Africa", num: 365, unit: "miles", line: "Its great lake runs 365 miles north to south, so people call it the “Calendar Lake”." },
+  { c: "Sudan", fmt: "number", region: "North-East Africa", num: 80, pre: "70–", unit: "%", line: "of the world’s crude gum arabic exports, the stuff that keeps your soft drinks and sweets stable." },
+  { c: "Ethiopia", fmt: "clues", region: "East Africa",
+    clues: ["Its calendar has 13 months.", "New Year falls on 11 September, and it’s currently the year 2019 there.", "In 2024 it became the first country in Africa to ban imports of new petrol and diesel cars."] },
+  { c: "Ghana", fmt: "clues", region: "West Africa",
+    clues: ["It had emojis before phones did.", "Its Adinkra symbols each pack a whole proverb into a single image."] },
+  { c: "Morocco", fmt: "clues", region: "North Africa",
+    clues: ["Goats here climb the argan tree, which grows naturally nowhere else on Earth.", "The oldest known Homo sapiens fossils were found here, at Mount Irhoud.", "Hospitality is poured from high above the glass: sweet green mint tea, often called “Berber whiskey”."] },
+  { c: "Tanzania", fmt: "beat", region: "East Africa",
+    clues: ["The only place on Earth where tanzanite, a rare blue-violet gem, is mined commercially.", "Birthplace of Singeli: music at 200–300+ beats per minute. That’s the pulse you’re seeing."] },
+  { c: "Uganda", fmt: "clues", region: "East Africa",
+    clues: ["It makes a fabric from tree bark. You see a tree; they see cloth.", "It’s home to the source of the River Nile."] },
+  { c: "Kenya", fmt: "rapid", region: "East Africa",
+    clues: ["Turkana Boy, one of the most complete early-human skeletons, was found here.", "Ol Pejeta is home to the last two northern white rhinos on Earth.", "Lake Turkana is the world’s largest permanent desert lake."] },
+  { c: "Nigeria", fmt: "clues", region: "West Africa",
+    clues: ["The ancient Walls of Benin were four times longer than the Great Wall of China.", "One of the highest twin-birth rates in the world.", "Half of its people are 19 or younger."] },
+];
+const SECS = ["Welcome", "Introduction", "The Game", "Who we are", "What we offer", "Business culture", "Why we take part", "What we expect", "Outro"];
+
+/* ================= helpers ================= */
+let _rng = 7;
+const rnd = () => ((_rng = (_rng * 16807) % 2147483647) / 2147483647);
+const seed = (s) => { _rng = s; };
+const brand = () => `<div class="brand">AFRIKA KOMMT<i>!</i> 15</div>`;
+const sec = (n) => `<div class="secno">${String(n).padStart(2, "0")} · ${esc(SECS[n])}</div>`;
+const initials = (n) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+const photo = (f) => f.photo ? `<img src="${esc(f.photo)}" alt="${esc(f.name)}" loading="lazy">` : `<div class="ini">${esc(initials(f.short + " " + (f.name.split(/\s+/).slice(-1)[0] || "")))}</div>`;
+
+/* ---- map (Mercator, fitted to a box) ---- */
+const LON = [-18, 52], LAT = [-35.5, 38];
+const merc = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+function proj(w, h, pad = 0) {
+  const x0 = LON[0], x1 = LON[1], y0 = merc(LAT[1]), y1 = merc(LAT[0]);
+  const sx = (w - 2 * pad) / (x1 - x0), sy = (h - 2 * pad) / ((y0 - y1) * 180 / Math.PI);
+  const s = Math.min(sx, sy), ox = (w - s * (x1 - x0)) / 2, oy = (h - s * (y0 - y1) * 180 / Math.PI) / 2;
+  return ([lon, lat]) => [ox + (lon - x0) * s, oy + (y0 - merc(lat)) * 180 / Math.PI * s];
+}
+function geoPath(g, p) {
+  const ring = (r) => "M" + r.map((pt) => p(pt).map((v) => v.toFixed(1)).join(",")).join("L") + "Z";
+  if (g.type === "Polygon") return g.coordinates.map(ring).join("");
+  if (g.type === "MultiPolygon") return g.coordinates.map((poly) => poly.map(ring).join("")).join("");
+  return "";
+}
+function centroid(g, p) {
+  let rings = g.type === "Polygon" ? [g.coordinates[0]] : g.coordinates.map((x) => x[0]);
+  rings.sort((a, b) => b.length - a.length);
+  const pts = rings[0].map(p); let x = 0, y = 0;
+  for (const q of pts) { x += q[0]; y += q[1]; }
+  return [x / pts.length, y / pts.length];
+}
+const CENTER_FIX = { Morocco: [-6.5, 31.8], Egypt: [30, 26.5], Sudan: [30, 15.5], Malawi: [34, -13.2], Ghana: [-1.2, 7.8], Uganda: [32.4, 1.4], Kenya: [37.8, 0.3], Tanzania: [34.8, -6.3], Ethiopia: [39.5, 8.6], Nigeria: [8.1, 9.6], Cameroon: [12.4, 5.2] };
+function mapSVG({ w = 900, h = 980, hl = [], focus = null, pins = false, labels = false, pinStep = null, cls = "" }) {
+  const p = proj(w, h, 10);
+  let s = `<svg class="map ${cls}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`;
+  for (const f of GEO.features) {
+    const n = f.properties.name;
+    s += `<path class="c${hl.includes(n) ? " hl" : ""}${focus === n ? " focus" : ""}" data-c="${esc(n)}" d="${geoPath(f.geometry, p)}"/>`;
+  }
+  if (pins) {
+    hl.forEach((n, i) => {
+      const [x, y] = CENTER_FIX[n] ? p(CENTER_FIX[n]) : [0, 0];
+      const r = 22 + Math.sqrt(COUNT(n)) * 9;
+      s += `<g class="pin" ${pinStep ? `data-s="${pinStep}" data-fx="pop" style="--d:${(i * 0.07).toFixed(2)}s"` : ""}><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/><text x="${x.toFixed(1)}" y="${y.toFixed(1)}">${COUNT(n)}</text>${labels ? `<text class="lab" x="${(x + r + 10).toFixed(1)}" y="${y.toFixed(1)}" style="text-anchor:start;font-size:22px">${esc(n)}</text>` : ""}</g>`;
+    });
+  }
+  return s + "</svg>";
+}
+const COUNTRIES = Object.keys(byCountry).sort((a, b) => COUNT(b) - COUNT(a));
+
+/* ---- baobab (procedural SVG; ground at y = 0, grows upward) ---- */
+function baobabSVG({ id, w = 1100, h = 900, fruits = 0, roots = true, leaves = true, clinic = false }) {
+  seed(42);
+  const limbs = [], twigs = [], leafs = [], fr = [], rts = [];
+  const TOP = -330, n = 7;
+  for (let i = 0; i < n; i++) {
+    const u = i / (n - 1), x0 = -50 + u * 100, a = (-80 + u * 160) * Math.PI / 180;
+    const L = 170 + rnd() * 70 - Math.abs(u - 0.5) * 30;
+    const x1 = x0 + Math.sin(a) * L * 1.2, y1 = TOP - Math.cos(a) * L * 0.62 - 40 - Math.abs(Math.sin(a)) * 30;
+    const cx = x0 + Math.sin(a) * L * 0.35, cy = TOP - L * 0.62;
+    limbs.push({ d: `M${x0.toFixed(1)},${TOP + 20}Q${cx.toFixed(1)},${cy.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`, w: 24 - Math.abs(u - .5) * 12 });
+    const k = 2 + (rnd() > .45 ? 1 : 0);
+    for (let j = 0; j < k; j++) {
+      const b = a + (j - (k - 1) / 2) * 0.7 + (rnd() - .5) * .25, l2 = 60 + rnd() * 50;
+      const x2 = x1 + Math.sin(b) * l2, y2 = y1 - Math.cos(b) * l2 * 0.6;
+      twigs.push({ d: `M${x1.toFixed(1)},${y1.toFixed(1)}Q${((x1 + x2) / 2 + (rnd() - .5) * 20).toFixed(1)},${((y1 + y2) / 2 - 12).toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`, w: 11 });
+      const m = 7 + Math.floor(rnd() * 5);
+      for (let q = 0; q < m; q++) leafs.push({ x: x2 + (rnd() - .5) * 80, y: y2 + (rnd() - .6) * 50, r: 10 + rnd() * 13, c: ["#4f8a3f", "#6aa04f", "#3e7535", "#86b25e"][Math.floor(rnd() * 4)], d: (limbs.length * 0.08 + q * 0.03 + rnd() * .2).toFixed(2) });
+      if (fr.length < fruits && rnd() > .2) fr.push({ x: x2 + (rnd() - .5) * 30, y: y2 + 26 + rnd() * 14 });
+    }
+  }
+  while (fr.length < fruits) { const t = twigs[fr.length % twigs.length].d.split(" ").pop().split(","); fr.push({ x: +t[0] + (rnd() - .5) * 40, y: +t[1] + 30 + rnd() * 20 }); }
+  for (let i = 0; i < 9; i++) {
+    const u = i / 8, x0 = -80 + u * 160, x1 = x0 * 3.2 + (rnd() - .5) * 120, y1 = 120 + rnd() * 110;
+    rts.push({ d: `M${x0.toFixed(1)},6Q${(x0 * 1.6).toFixed(1)},${(y1 * .45).toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`, w: 14 - Math.abs(u - .5) * 12 });
+  }
+  const vb = `${-w / 2} ${-h + 260} ${w} ${h}`;
+  let s = `<svg class="bb" id="${id}" viewBox="${vb}" width="${w}" height="${h}"><defs><linearGradient id="barkG-${id}" x1="0" x2="1"><stop offset="0" stop-color="#8a7258"/><stop offset=".55" stop-color="#a48a6c"/><stop offset="1" stop-color="#6f5a45"/></linearGradient></defs>`;
+  if (roots) s += `<g class="roots">${rts.map((r) => `<path class="root" d="${r.d}" stroke-width="${r.w.toFixed(1)}" pathLength="1"/>`).join("")}</g>`;
+  s += `<g class="seed"><ellipse cx="0" cy="-10" rx="16" ry="11" fill="#7b5b3a"/><path class="sprout" d="M0,-18 C-4,-50 6,-70 0,-96" stroke="#5c8f45" stroke-width="6" fill="none" pathLength="1"/><ellipse class="spl" cx="-14" cy="-92" rx="14" ry="7" fill="#6aa04f" transform="rotate(-30 -14 -92)"/><ellipse class="spl" cx="13" cy="-98" rx="14" ry="7" fill="#6aa04f" transform="rotate(25 13 -98)"/></g>`;
+  s += `<g class="tree">`;
+  s += `<path class="trunk" style="fill:url(#barkG-${id})" d="M-105,4 C-128,-90 -88,-230 -60,-${-TOP} L60,-${-TOP} C88,-230 128,-90 105,4 Z"/>`;
+  s += `<path d="M-40,-60 C-46,-150 -30,-240 -20,-310 M18,-40 C26,-140 20,-230 30,-300" stroke="rgba(60,40,25,.25)" stroke-width="5" fill="none"/>`;
+  s += limbs.map((l) => `<path class="limb" d="${l.d}" stroke-width="${l.w.toFixed(1)}" pathLength="1"/>`).join("");
+  s += twigs.map((l) => `<path class="limb twig" d="${l.d}" stroke-width="${l.w}" pathLength="1"/>`).join("");
+  if (leaves) s += `<g class="leaves">${leafs.map((l) => `<circle class="leaf" cx="${l.x.toFixed(1)}" cy="${l.y.toFixed(1)}" r="${l.r.toFixed(1)}" fill="${l.c}" style="transition-delay:${l.d}s"/>`).join("")}</g>`;
+  if (fruits) s += `<g class="fruits">${fr.map((f, i) => `<g class="fr" style="transition-delay:${(i * 0.05).toFixed(2)}s"><line x1="${f.x.toFixed(1)}" y1="${(f.y - 24).toFixed(1)}" x2="${f.x.toFixed(1)}" y2="${(f.y - 8).toFixed(1)}" stroke="#6f5a45" stroke-width="2.5"/><ellipse class="fruit" cx="${f.x.toFixed(1)}" cy="${f.y.toFixed(1)}" rx="11" ry="15"/></g>`).join("")}</g>`;
+  s += `</g>`;
+  if (clinic) {
+    s += `<g class="clinic" transform="translate(330,0)"><rect x="0" y="-120" width="190" height="120" rx="6" fill="#f4efe3" stroke="#cfc4aa" stroke-width="3"/><path d="M-14,-118 L95,-178 L204,-118 Z" fill="#b65a3c"/><rect x="74" y="-70" width="42" height="70" fill="#7b6a55"/><rect x="18" y="-92" width="38" height="30" fill="#bcd6e4"/><rect x="136" y="-92" width="38" height="30" fill="#bcd6e4"/><path d="M95,-160 v28 M81,-146 h28" stroke="#fff" stroke-width="8"/></g>`;
+    s += `<g class="people" transform="translate(270,0)"><g><circle cx="0" cy="-118" r="17" fill="#5a3a26"/><path d="M-22,0 L-20,-70 Q0,-100 20,-70 L22,0 Z" fill="#fff" stroke="#9fc3b2" stroke-width="3"/><rect class="tab" x="14" y="-74" width="18" height="24" rx="3" fill="#ffe08a"/></g><g transform="translate(-70,0)"><circle cx="0" cy="-104" r="15" fill="#4a2f20"/><path d="M-19,0 L-17,-62 Q0,-86 17,-62 L19,0 Z" fill="#c98b3d"/></g></g>`;
+  }
+  s += `</svg>`;
+  return s;
+}
+/* growth 0..1: seed → sprout → trunk → limbs → leaves → fruits */
+function grow(svg, p, fruit = 0) {
+  if (!svg) return;
+  const cl = (v) => Math.max(0, Math.min(1, v));
+  const seedG = svg.querySelector(".seed"), tree = svg.querySelector(".tree");
+  seedG.style.opacity = p < 0.22 ? 1 : cl(1 - (p - 0.22) * 8);
+  const sp = svg.querySelector(".sprout"); sp.style.strokeDasharray = 1; sp.style.strokeDashoffset = 1 - cl(p / 0.12);
+  svg.querySelectorAll(".spl").forEach((e) => { e.style.opacity = cl((p - 0.09) * 20); });
+  const t = cl((p - 0.15) / 0.3);
+  tree.style.transformOrigin = "0px 0px"; tree.style.transformBox = "view-box";
+  tree.style.transform = `scale(${(0.12 + 0.88 * t).toFixed(3)}, ${(0.05 + 0.95 * t).toFixed(3)})`;
+  tree.style.opacity = cl(t * 6);
+  svg.querySelectorAll(".limb").forEach((e, i) => { e.style.strokeDasharray = 1; e.style.strokeDashoffset = 1 - cl((p - 0.35 - (e.classList.contains("twig") ? 0.12 : 0)) / 0.22); });
+  svg.querySelectorAll(".root").forEach((e) => { e.style.strokeDasharray = 1; e.style.strokeDashoffset = 1 - cl((p - 0.1) / 0.5); });
+  svg.querySelectorAll(".leaf").forEach((e) => { const on = p > 0.72; e.style.opacity = on ? 1 : 0; e.style.transform = on ? "scale(1)" : "scale(.2)"; });
+  svg.querySelectorAll(".fr").forEach((e) => { e.style.transition = "opacity .6s, transform .6s"; e.style.opacity = fruit; e.style.transform = fruit ? "none" : "translateY(-10px)"; });
+}
+const tweens = new Map();
+function tweenGrow(svg, to, dur = 2600, fruit = 0) {
+  if (!svg) return;
+  if (STILL) { svg.dataset.p = to; grow(svg, to, fruit); return; }
+  const from = +(svg.dataset.p || 0), t0 = performance.now();
+  cancelAnimationFrame(tweens.get(svg));
+  const step = (t) => {
+    const k = Math.min(1, (t - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    const p = from + (to - from) * e; svg.dataset.p = p; grow(svg, p, fruit);
+    if (k < 1) tweens.set(svg, requestAnimationFrame(step));
+  };
+  tweens.set(svg, requestAnimationFrame(step));
+}
+
+/* ---- count-up numbers ---- */
+function countUp(root) {
+  root.querySelectorAll("[data-count]").forEach((el) => {
+    if (el.closest("[data-s]") && !el.closest("[data-s]").classList.contains("on")) return;
+    if (el.dataset.done) return; el.dataset.done = 1;
+    if (STILL) { el.textContent = (el.dataset.pre || "") + (+el.dataset.count).toLocaleString("en-US") + (el.dataset.suf || ""); return; }
+    const to = +el.dataset.count, pre = el.dataset.pre || "", suf = el.dataset.suf || "", t0 = performance.now(), dur = +(el.dataset.dur || 1600);
+    const f = (t) => { const k = Math.min(1, (t - t0) / dur), v = Math.round(to * (1 - Math.pow(1 - k, 3))); el.textContent = pre + v.toLocaleString("en-US") + suf; if (k < 1) requestAnimationFrame(f); };
+    requestAnimationFrame(f);
+  });
+}
+function resetCounts(root) { root.querySelectorAll("[data-count]").forEach((el) => { delete el.dataset.done; el.textContent = (el.dataset.pre || "") + "0" + (el.dataset.suf || ""); }); }
+
+/* ================= sound (synthesised, no samples) ================= */
+let AC = null, muted = !new URLSearchParams(location.search).has("sound"); // sound is off until someone turns it on (M or the Sound button), or open with ?sound
+const ac = () => (AC = AC || new (window.AudioContext || window.webkitAudioContext)());
+function deepNote() { // cinematic attention swell: a cloud of saws gliding into a wide D chord
+  if (muted) return; const a = ac(), t = a.currentTime, out = a.createGain(), lp = a.createBiquadFilter();
+  lp.type = "lowpass"; lp.frequency.setValueAtTime(220, t); lp.frequency.exponentialRampToValueAtTime(5200, t + 5.5);
+  out.gain.setValueAtTime(0.0001, t); out.gain.exponentialRampToValueAtTime(0.22, t + 3.2); out.gain.setValueAtTime(0.22, t + 6.2); out.gain.exponentialRampToValueAtTime(0.0001, t + 9.5);
+  lp.connect(out); out.connect(a.destination);
+  const target = [36.7, 73.4, 110, 146.8, 220, 293.7, 440, 587.3, 880, 1174.7];
+  for (let i = 0; i < 26; i++) {
+    const o = a.createOscillator(), g = a.createGain(), pan = a.createStereoPanner ? a.createStereoPanner() : null;
+    o.type = "sawtooth"; const f0 = 200 + Math.random() * 200, f1 = target[i % target.length] * (1 + (Math.random() - .5) * 0.004);
+    o.frequency.setValueAtTime(f0, t); o.frequency.setValueAtTime(f0, t + 0.6); o.frequency.exponentialRampToValueAtTime(f1, t + 4.6);
+    g.gain.value = 0.03; o.connect(g); if (pan) { pan.pan.value = Math.random() * 2 - 1; g.connect(pan); pan.connect(lp); } else g.connect(lp);
+    o.start(t); o.stop(t + 9.8);
+  }
+}
+function ding(hi = 1) {
+  if (muted || !AC) return; const a = ac(), t = a.currentTime;
+  [880 * hi, 1318.5 * hi].forEach((f, i) => { const o = a.createOscillator(), g = a.createGain(); o.type = "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + i * .09); g.gain.exponentialRampToValueAtTime(0.18, t + i * .09 + .02); g.gain.exponentialRampToValueAtTime(0.0001, t + i * .09 + 1.1); o.connect(g); g.connect(a.destination); o.start(t + i * .09); o.stop(t + i * .09 + 1.2); }); }
+function whoosh() { if (muted || !AC) return; const a = ac(), t = a.currentTime, n = a.sampleRate * .5, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n);
+  const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(); s.buffer = b; f.type = "bandpass"; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(3000, t + .45); g.gain.value = .12; s.connect(f); f.connect(g); g.connect(a.destination); s.start(t); }
+
+/* ================= slides ================= */
+const S = [];
+const add = (o) => S.push(o);
+
+/* ---------- 0 · Welcome (cold open) ---------- */
+const GREET = [
+  ["Karibu", "Swahili · Kenya, Tanzania", 110, 80, ""], ["Ẹ káàbọ̀", "Yoruba · Nigeria", 760, 80, ""], ["Akwaaba", "Twi · Ghana", 1360, 80, ""],
+  ["Wamukelekile", "isiZulu", 110, 330, ""], ["Bienvenue", "French · Cameroon", 1150, 330, ""],
+  ["እንኳን ደህና መጣችሁ", "Amharic · Ethiopia", 110, 580, "am"], ["Boyei bolamu", "Lingala", 1150, 580, ""],
+  ["Tikulandireni", "Chichewa · Malawi", 110, 830, ""], ["أهلاً وسهلاً", "Arabic · Egypt, Sudan, Morocco", 1150, 830, "ar"],
+];
+add({ sec: 0, title: "Cold open: welcome", cls: "black", steps: GREET.length + 1,
+  html: () => `<canvas class="fx" data-fx="dust"></canvas>
+    ${GREET.map((g, i) => `<div class="greet ${g[4]}" data-s="${i + 1}" data-fx="blur" style="left:${g[2]}px;top:${g[3]}px">${g[0]}<small>${g[1]}</small></div>`).join("")}
+    <div class="abs" data-s="${GREET.length + 1}" data-fx="pop" style="left:0;right:0;top:390px;text-align:center"><div class="h xl" style="color:#fff">Guten Morgen<span style="color:var(--gold-2)">!</span></div></div>`,
+  onStep(el, s) { el.querySelectorAll(".greet").forEach((g, i) => g.classList.toggle("gone", s === GREET.length + 1)); if (s === GREET.length + 1) ding(.75); },
+  notes: `<b>Cold open.</b> Screen black, nobody on stage. Press → once per greeting as each fellow stands in the crowd and says good morning in their language. The first click plays the attention sound. <b>Agnes & Kelvin</b> walk up during the last greeting: “Guten Morgen, alle!” · Kelvin: “It’s a pleasure to be here with you today.” <i>Pause.</i>` });
+
+/* ---------- 1 · Introduction: the baobab ---------- */
+add({ sec: 1, title: "The baobab, Tree of Life", cls: "cream", steps: 4,
+  html: () => `<div class="panel-l" style="width:760px"></div>
+    <div class="abs" style="left:80px;top:96px;width:620px;color:#fff">
+      <div class="kick in" style="color:var(--gold-2)">Introduction</div>
+      <div class="h l in" style="--d:.3s;margin-top:18px">The<br>Baobab</div>
+      <div class="lead in" style="--d:.5s;margin-top:22px;color:rgba(255,255,255,.85)">Often called the <b style="color:#fff">Tree of Life</b>.</div>
+      <div data-s="2" style="margin-top:56px"><div class="stat" style="color:#fff;font-size:104px;white-space:nowrap"><span data-count="3000" data-pre="1,000–" data-dur="1800">0</span></div><div class="stat-l" style="color:rgba(255,255,255,.75)">years: how long some baobabs live</div></div>
+      <div data-s="3" style="margin-top:40px"><div class="h s" style="color:var(--gold-2)">2,450 years</div><div class="stat-l" style="color:rgba(255,255,255,.75)">the Panke baobab, Zimbabwe, when it died in 2011</div></div>
+    </div>
+    <div class="abs" style="left:780px;top:60px;width:1100px;height:900px">${baobabSVG({ id: "bb1", fruits: 0 })}</div>
+    <div class="ground-line" style="left:780px;top:702px"></div>
+    <div class="abs" data-s="4" style="left:860px;top:860px;display:flex;gap:18px">${["Food", "Water", "Medicine", "Shelter"].map((x, i) => `<span class="chip" style="--d:${i * .12}s">${x}</span>`).join("")}</div>
+    ${brand()}`,
+  onEnter(el) { const s = el.querySelector("#bb1"); s.dataset.p = 0; grow(s, 0); },
+  onStep(el, s) { const svg = el.querySelector("#bb1"); tweenGrow(svg, [0.06, 0.06, 0.55, 1, 1][s] ?? 1, s === 1 ? 900 : 2800); },
+  notes: `<b>Agnes:</b> “I’d like to begin with a tree that holds a special place in the African landscape: the baobab, often referred to as the Tree of Life. Some have lived for thousands of years, between 1,000 and 3,000. One famous tree in Zimbabwe, the Panke baobab, was about 2,450 years old when it died in 2011. Beyond its lifespan, it has been valued across Africa for the food, water, medicine and shelter it provides.” Each click grows the tree further.` });
+
+add({ sec: 1, title: "Every baobab begins as a seed", cls: "dark", steps: 2,
+  html: () => `<canvas class="fx" data-fx="dust"></canvas>
+    <div class="abs" style="left:0;right:0;top:120px;text-align:center">
+      <div class="kick in">Our journey today</div>
+      <div class="h m in" style="--d:.3s;margin-top:24px">Even the mightiest baobab<br>begins as a <span style="color:var(--gold-2)">seed.</span></div>
+    </div>
+    <div class="abs" style="left:410px;top:420px;width:1100px;height:600px;overflow:visible">${baobabSVG({ id: "bb2", w: 1100, h: 900, roots: true })}</div>
+    <div class="abs" data-s="2" style="left:0;right:0;top:880px;display:flex;justify-content:center;gap:22px">${["What was planted", "What took root", "What continues to grow"].map((x, i) => `<span class="chip" style="--d:${i * .2}s">${x}</span>`).join("")}</div>
+    ${sec(1)}${brand()}`,
+  onEnter(el) { const s = el.querySelector("#bb2"); s.style.transform = "scale(.62)"; s.style.transformOrigin = "50% 60%"; s.dataset.p = 0; grow(s, 0); tweenGrow(s, 0.1, 1500); },
+  onStep(el, s) { if (s >= 1) tweenGrow(el.querySelector("#bb2"), s === 2 ? 0.5 : 0.12, 2000); },
+  notes: `<b>Agnes:</b> “Across Africa, the baobab stands as a symbol of resilience, wisdom and connection. But even the mightiest baobab begins as something small: a seed… Today, we invite you to follow the journey of our baobab: what was planted, what took root, and what continues to grow.” <br><b>Transition:</b> “Apart from the baobab, Africa has so much to offer. What do you think, Kelvin?”` });
+
+add({ sec: 1, title: "One leaf on a gigantic baobab", cls: "cream", steps: 2,
+  html: () => `<div class="abs" style="left:110px;top:150px;width:900px">
+      <div class="kick in">Africa has many stories</div>
+      <div class="h m in" style="--d:.25s;margin-top:20px">Cultures. Traditions. Innovation. Business.</div>
+      <div class="lead" data-s="1" style="margin-top:40px">Africa is also a continent of <b>people</b>. Very young people.</div>
+      <div class="h s g" data-s="2" style="margin-top:46px">A single leaf on a gigantic baobab.</div>
+      <div class="lead" data-s="2" style="--d:.3s;margin-top:22px">Do you know the fresh baobab, or only the old one?</div>
+    </div>
+    <div class="abs leafzoom" style="left:1060px;top:120px;width:800px;height:820px">${baobabSVG({ id: "bb3", w: 800, h: 820, roots: false })}</div>
+    ${sec(1)}${brand()}`,
+  onEnter(el) { const s = el.querySelector("#bb3"); s.dataset.p = 1; grow(s, 1); s.style.transition = "transform 2.4s cubic-bezier(.6,0,.2,1)"; s.style.transform = "none"; },
+  onStep(el, s) { const svg = el.querySelector("#bb3"); const leaves = [...svg.querySelectorAll(".leaf")]; leaves.forEach((l, i) => { l.style.opacity = s >= 2 ? (i === 17 ? 1 : 0.12) : 1; }); if (s >= 2) { const L = leaves[17]; L.style.transform = "scale(2.4)"; L.setAttribute("fill", "#d8bf6a"); } },
+  notes: `<b>Kelvin:</b> “Africa has many, many stories to tell. From its cultures and traditions, to its innovations, natural resources and business culture, we have diversity to no end. What we think we know about Africa, more often than not, is a very small part of the picture. It’s a single, tiny leaf on a gigantic baobab.” <i>(Doc comment: Kelvin is re-wording this.)</i>` });
+
+/* ---------- 2 · The Game ---------- */
+add({ sec: 2, title: "Game title: Africa, Beyond the Headlines", cls: "green", steps: 2,
+  html: () => `<canvas class="fx" data-fx="spot"></canvas>
+    <div class="abs" style="left:0;right:0;top:200px;text-align:center">
+      <div class="kick in" style="color:var(--gold-2)">A little game</div>
+      <div class="h xl in" style="--d:.25s;margin-top:20px">Africa:</div>
+      <div class="h l in" style="--d:.45s;color:var(--gold-2)">Beyond the Headlines</div>
+      <div class="lead" data-s="1" style="margin:56px auto 0;max-width:1200px">We share a few facts. You guess the country.<br>Then you meet the people from it.</div>
+      <div data-s="2" data-fx="pop" style="margin-top:44px;display:flex;gap:16px;justify-content:center"><span class="chip">11 countries</span><span class="chip">32 fellows</span><span class="chip">Bonus points for the country</span></div>
+    </div>${brand()}`,
+  onStep(el, s) { if (s === 2) ding(); },
+  notes: `<b>Kelvin:</b> “Beyond its geography, cultures and landscapes, Africa is also a continent of people… And how much of what we think we know reflects the Africa we know today? We thought we’d find out! We’d like to play a little game: <i>Africa: Beyond the Headlines!</i>” <b>Agnes:</b> “We’ll share some surprising facts about different African countries. Your job is to guess what we’re talking about. And if you can identify the country, you get bonus points! Some of you might surprise us. Some of you might surprise yourselves! Ready?”` });
+
+ROUNDS.forEach((R, ri) => {
+  const n = COUNT(R.c), pips = ROUNDS.map((_, i) => `<i class="${i < ri ? "done" : i === ri ? "now" : ""}"></i>`).join("");
+  const dark = ri % 2 === 1;
+  const round = `<div class="round"><b class="${dark ? "" : "g"}">Round ${ri + 1}</b><div class="pips">${pips}</div></div>`;
+  let body = "", clueSteps = 0;
+  if (R.fmt === "number") {
+    clueSteps = 1;
+    body = `<div class="abs" style="left:110px;top:230px;width:1100px">
+      <div class="kick">${esc(R.region)} · How well do you know it?</div>
+      <div class="bignum" style="margin-top:30px"><span data-count="${R.num}" data-pre="${esc(R.pre || "")}" data-suf="${R.unit === "%" ? "%" : ""}" data-dur="2000">0</span></div>
+      ${R.unit !== "%" ? `<div class="h s" style="color:var(--gold)">${esc(R.unit)}</div>` : ""}
+      <p class="lead" data-s="1" style="margin-top:34px;max-width:1000px;font-size:40px;color:inherit;font-weight:600">${esc(R.line)}</p></div>`;
+  } else if (R.fmt === "nickname") {
+    clueSteps = R.clues.length + 1;
+    body = `<div class="abs" style="left:110px;top:220px;width:1150px">
+      <div class="kick">${esc(R.region)} · Its nickname is…</div>
+      <div class="h l g" data-s="1" data-fx="blur" style="margin-top:30px">${esc(R.nick)}</div>
+      ${R.clues.map((c, i) => `<div class="clue" data-s="${i + 2}" style="margin-top:${i ? 30 : 60}px"><div class="n">${i + 1}</div><p>${esc(c)}</p></div>`).join("")}</div>`;
+  } else if (R.fmt === "tf") {
+    clueSteps = R.clues.length * 2;
+    body = `<div class="abs" style="left:110px;top:200px;width:1200px"><div class="kick">${esc(R.region)} · True or false?</div>
+      ${R.clues.map((c, i) => `<div style="margin-top:60px;display:flex;gap:40px;align-items:center"><div class="clue" data-s="${i * 2 + 1}" style="flex:1"><div class="n">?</div><p>${esc(c[0])}</p></div><div data-s="${i * 2 + 2}" data-fx="pop"><span class="tf">${c[1] ? "TRUE" : "FALSE"}</span></div></div>`).join("")}</div>`;
+  } else if (R.fmt === "beat") {
+    clueSteps = R.clues.length;
+    body = `<div class="abs" style="left:110px;top:200px;width:1150px"><div class="kick">${esc(R.region)} · Feel the clue</div>
+      ${R.clues.map((c, i) => `<div class="clue" data-s="${i + 1}" style="margin-top:${i ? 40 : 60}px"><div class="n">${i + 1}</div><p>${esc(c)}</p></div>`).join("")}</div>
+      <div class="abs" data-s="2" style="left:1520px;top:400px"><div class="beat"></div></div>`;
+  } else {
+    clueSteps = R.clues.length;
+    const rapid = R.fmt === "rapid";
+    body = `<div class="abs" style="left:110px;top:${rapid ? 180 : 210}px;width:1180px"><div class="kick">${esc(R.region)} · ${rapid ? "Rapid fire" : `${R.clues.length} clues`}</div>
+      ${R.clues.map((c, i) => `<div class="clue" data-s="${i + 1}" ${rapid ? 'data-fx="left"' : ""} style="margin-top:${i ? (rapid ? 28 : 40) : 56}px"><div class="n">${i + 1}</div><p ${rapid ? 'style="font-size:42px"' : ""}>${esc(c)}</p></div>`).join("")}</div>`;
+  }
+  const guess = clueSteps + 1, reveal = clueSteps + 2;
+  add({ sec: 2, title: `Round ${ri + 1}: ${R.c}`, cls: dark ? "dark" : "", steps: reveal, round: R.c,
+    html: () => `${round}
+      <div class="reveal-wrap" data-x="${reveal}">${body}
+        <div class="timer" data-s="${guess}" data-fx="pop" style="left:1560px;top:120px"><svg viewBox="0 0 190 190"><circle class="bg" cx="95" cy="95" r="85"/><circle class="fg" cx="95" cy="95" r="85"/></svg><span>GUESS</span></div>
+        <div class="abs" data-s="${guess}" style="left:1400px;top:360px;width:420px;height:460px;opacity:.9">${mapSVG({ w: 420, h: 460, hl: [], cls: "mini" })}</div>
+      </div>
+      <div class="reveal-wrap">
+        <div class="abs" data-s="${reveal}" data-fx="blur" style="left:90px;top:170px;width:1060px">
+          <div class="kick">${esc(R.region)}</div>
+          <div class="knock" style="font-size:${Math.min(280, Math.floor(1000 / (R.c.length * 0.68)))}px;margin-top:16px">${esc(R.c.toUpperCase())}</div>
+          <div class="flagstrip" style="background-image:url('${FLAGS[R.c] || ""}')"></div>
+          <div style="display:flex;gap:18px;margin-top:40px;align-items:center"><span class="chip" style="font-size:34px;padding:16px 34px">${n} fellow${n > 1 ? "s" : ""}</span><span class="lead" style="font-size:30px">${n > 4 ? "Please stand up!" : "Get ready to stand…"}</span></div>
+        </div>
+        <div class="abs" data-s="${reveal}" data-fx="fade" style="left:1150px;top:80px;width:700px;height:900px">${mapSVG({ w: 700, h: 900, focus: R.c, hl: [] })}</div>
+      </div>${brand()}`,
+    onStep(el, s) {
+      el.querySelector(".timer").classList.toggle("on", s === guess);
+      el.querySelectorAll("[data-x]").forEach((x) => x.classList.toggle("off", s >= +x.dataset.x));
+      if (s === reveal) { ding(); }
+      countUp(el);
+    },
+    notes: `<b>${esc(R.c)} round.</b> Click through the clues (${clueSteps}). Next click starts a 10-second “guess” ring and shows a blank map; let the room shout answers. Next click reveals <b>${esc(R.c.toUpperCase())}</b>, its place on the map and its ${n} fellow${n > 1 ? "s" : ""}.${R.c === "Kenya" ? " <i>Note: the doc said “first known man, from Olduvai”; Olduvai is in Tanzania, so this uses Turkana Boy (found in Kenya).</i>" : ""}${R.c === "Nigeria" ? " <i>Twin-birth figure in the doc (158 per 1,000) refers to Igbo-Ora, so the slide says “one of the highest”.</i>" : ""}` });
+
+  // fellows of this country: up to 4 per slide (doc); small groups reveal one by one, big groups all together
+  const fs = byCountry[R.c] || [], chunks = [];
+  for (let i = 0; i < fs.length; i += 4) chunks.push(fs.slice(i, i + 4));
+  chunks.forEach((ch, ci) => {
+    const one = fs.length <= 2, cols = ch.length, compact = cols >= 3;
+    const W = compact ? 400 : 560, gap = 30, total = cols * W + (cols - 1) * gap, left = (1920 - total) / 2;
+    add({ sec: 2, title: `${R.c}: meet ${ch.map((f) => f.short).join(", ")}`, cls: "cream", steps: one ? ch.length : 1,
+      html: () => `<div class="abs" style="left:64px;top:50px;display:flex;align-items:center;gap:22px">
+          <img src="${FLAGS[R.c] || ""}" alt="" style="width:72px;height:54px;border-radius:8px;object-fit:cover;box-shadow:0 2px 10px rgba(0,0,0,.15)">
+          <div class="h s g in" style="font-size:58px">${one ? "And coming from" : "Please stand,"} ${esc(R.c)}${chunks.length > 1 ? ` <span style="color:var(--gold);font-size:40px">${ci + 1}/${chunks.length}</span>` : ""}</div></div>
+        <div class="abs" style="right:70px;top:30px;width:150px;height:170px">${mapSVG({ w: 150, h: 170, focus: R.c })}</div>
+        <div class="fgrid" style="left:${left}px;top:${compact ? 210 : 230}px;grid-template-columns:repeat(${cols},${W}px);gap:${gap}px">
+          ${ch.map((f, i) => `<div class="fcard ${compact ? "compact" : ""}" data-s="${one ? i + 1 : 1}" data-fx="pop" style="--d:${one ? 0 : i * 0.18}s">
+            <span class="stand">Please stand</span>
+            <div class="ph">${photo(f)}</div><h3 style="${f.full.length > 18 ? "font-size:34px" : f.full.length > 14 ? "font-size:40px" : ""}">${esc(f.full)}</h3>
+            <div class="role">${esc(f.role.replace(/s*(formerly[^)]*)/, "").replace(/;.*$/, ""))}${f.org && !/^\(/.test(f.org) ? ` · ${esc(f.org)}` : ""}</div>
+            ${f.serious ? `<div class="fact ser"><i>▲</i><span>${esc(f.serious)}</span></div>` : ""}
+            ${f.fun ? `<div class="fact fun"><i>✦</i><span>${esc(f.fun)}</span></div>` : ""}
+          </div>`).join("")}
+        </div>${brand()}`,
+      onStep(el, s) { el.querySelectorAll(".fcard").forEach((c) => c.classList.toggle("on", c.classList.contains("on"))); if (s > 0) ding(1.5); },
+      notes: one
+        ? ch.map((f, i) => `<p><b>Click ${i + 1}:</b> “${i ? "Next is" : `And coming from ${esc(R.c)} is`} ${esc(f.short)}. ${esc(f.short)}, please stand.” ${f.serious ? `They are great because ${esc(f.serious.replace(/\.$/, ""))}.` : ""} ${f.fun ? `Fun fact: ${esc(f.fun)}` : ""}</p>`).join("") + `<p>“Please give a hand for ${esc(R.c)}.”</p>`
+        : `<p><b>${esc(R.c)} stands as a group</b> (no individual introductions: time). One click shows ${ch.map((f) => esc(f.short)).join(", ")}. The screen carries their facts for anyone who wants to read. ${ci === chunks.length - 1 ? `“Please give a hand for ${esc(R.c)}!”` : "Next click: the rest of the group."}</p>` });
+  });
+});
+
+/* ---------- 3 · Who we are, as a group ---------- */
+add({ sec: 3, title: "What do we have in common?", cls: "dark", steps: 3,
+  html: () => `<canvas class="fx" data-fx="dust"></canvas>
+    <div class="abs" style="left:110px;top:110px;width:880px">
+      <div class="kick in">Who are we… as a group?</div>
+      <div class="h l in" style="--d:.25s;margin-top:22px">What do we all have in <span style="color:var(--gold-2)">common?</span></div>
+      <div style="display:flex;gap:70px;margin-top:46px">
+        <div data-s="1"><div class="stat"><span data-count="32">0</span></div><div class="stat-l">fellows</div></div>
+        <div data-s="1" style="--d:.15s"><div class="stat"><span data-count="11">0</span></div><div class="stat-l">countries</div></div>
+      </div>
+      <div class="lead" data-s="2" style="margin-top:34px">Technology. Finance. Pharma. Medicine. Engineering. Business. Different paths to get here.</div>
+      <div class="h s" data-s="3" style="margin-top:30px;color:var(--gold-2)">But we share a few things…</div>
+    </div>
+    <div class="abs" style="left:1060px;top:60px;width:820px;height:960px">${mapSVG({ w: 820, h: 960, hl: COUNTRIES, pins: true, pinStep: 1 })}</div>
+    ${sec(3)}${brand()}`,
+  onStep(el) { countUp(el); },
+  notes: `<b>Agnes:</b> “Kelvin, I’m curious. What do we all have in common?” <b>Kelvin:</b> “We are 32 fellows from 11 different African countries, bringing together different professional backgrounds, experiences and perspectives… Some of us work in technology, others in finance, pharmaceutical, medicine, engineering, business… But despite our differences, we share a few things in common…”` });
+
+add({ sec: 3, title: "We are Millennials & Gen Z", cls: "cream", steps: 3,
+  html: () => `<div class="panel-r" style="width:700px"></div>
+    <div class="abs" style="left:110px;top:100px;width:1000px">
+      <div class="kick in">01 · What brings us together</div>
+      <div class="h l in" style="--d:.25s;margin-top:22px">We are Millennials <span class="gold">&</span> Gen Z.</div>
+      <div class="lead" data-s="1" style="margin-top:28px">We remember life before smartphones… and some of us even remember life before Google!</div>
+      <div style="margin-top:34px;display:grid;gap:20px">
+        <div class="pillar" data-s="2"><h4>Millennial structure. Gen Z speed.</h4></div>
+        <div class="pillar" data-s="2" style="--d:.15s"><h4>Driven by purpose.</h4></div>
+        <div class="pillar" data-s="2" style="--d:.3s"><h4>Collaboration across cultures, time zones and hierarchies.</h4></div>
+      </div>
+    </div>
+    <div class="abs" style="right:70px;top:170px;width:560px;color:#fff">
+      <div class="kick" style="color:var(--gold-2)" data-s="3">Our strengths</div>
+      ${["Adaptability", "Collaboration", "A drive to grow"].map((x, i) => `<div class="h s" data-s="3" style="--d:${.15 + i * .15}s;margin-top:30px">${x}</div>`).join("")}
+    </div>${sec(3)}${brand()}`,
+  notes: `<b>Agnes:</b> “We are Millennials & Gen Zs.” <i>(joke about some of us looking a bit old)</i> “We grew up in a world that was becoming increasingly connected. We remember life before smartphones… and some of us even remember life before Google!”` });
+
+add({ sec: 3, title: "We are the Tech & AI generation", cls: "dark", steps: 6,
+  html: () => {
+    const nodes = [["Nokia 3310", "2000", 250], ["M-Pesa", "2007", 600], ["Smartphones", "& social media", 960], ["The cloud", "2010s", 1320], ["Gen AI", "2022 →", 1670]];
+    return `<canvas class="fx" data-fx="dust"></canvas>
+    <div class="abs" style="left:110px;top:110px;width:1500px">
+      <div class="kick in">02 · What brings us together</div>
+      <div class="h l in" style="--d:.25s;margin-top:22px">We grew up with the internet.<br><span style="color:var(--gold-2)">AI is changing our lives.</span></div>
+    </div>
+    <div class="abs" style="left:140px;top:640px;width:1640px;height:6px;background:rgba(255,255,255,.15);border-radius:3px"><div class="tlbar" style="height:100%;width:0;background:var(--gold-2);border-radius:3px;transition:width 1s cubic-bezier(.6,0,.2,1)"></div></div>
+    ${nodes.map((n, i) => `<div class="tl-node" data-s="${i + 1}" data-fx="pop" style="left:${n[2]}px;top:660px"><div class="dot"></div><b>${n[0]}</b><span>${n[1]}</span></div>`).join("")}
+    <div class="abs" data-s="6" style="left:0;right:0;top:880px;display:flex;gap:20px;justify-content:center"><span class="chip">Tech is how we solve problems</span><span class="chip">We’ll bring AI to your business</span></div>
+    ${sec(3)}${brand()}`; },
+  onStep(el, s) { el.querySelector(".tlbar").style.width = Math.min(100, s * 20) + "%"; },
+  notes: `<b>Kelvin / Agnes:</b> “We grew up with the internet, adapted to a world of smartphones and social media, and today we’re navigating another major transformation, one where artificial intelligence is changing how we work, think and live. Through all these changes, one thing has remained constant: our ability to adapt, to learn and to embrace new possibilities.” Each click lights the next point on the timeline.` });
+
+add({ sec: 3, title: "Shaped by disruption: COVID-19", cls: "cream", steps: 2,
+  html: () => `<canvas class="fx" data-fx="freeze"></canvas>
+    <div class="abs" style="left:110px;top:130px;width:1300px">
+      <div class="kick in">03 · What brings us together</div>
+      <div class="h l in" style="--d:.25s;margin-top:22px">We started our careers<br>when the world <span class="gold">stopped.</span></div>
+      <div class="lead" data-s="1" style="margin-top:40px;max-width:1150px">COVID-19 interrupted studies, careers and the very beginnings of our professional journeys.</div>
+      <div class="h s g" data-s="2" style="margin-top:46px">We kept going. We learnt resilience. We learnt to pivot fast.</div>
+    </div>${sec(3)}${brand()}`,
+  onStep(el, s) { const c = el.querySelector("canvas.fx"); if (c) c.dataset.state = s >= 2 ? "go" : "stop"; },
+  notes: `<b>Kelvin:</b> “We also came of age during a time that changed the world. COVID-19 disrupted our lives, our plans and the way we connected with one another… But through the uncertainty, we found the strength to keep going. We faced setbacks, overcame challenges, and emerged more resilient. And here we are.” The dots freeze, then move again on click 2.` });
+
+add({ sec: 3, title: "We are Africans", cls: "green", steps: 4,
+  html: () => `<div class="abs" style="left:110px;top:140px;width:960px">
+      <div class="kick in" style="color:var(--gold-2)">04 · What brings us together</div>
+      <div class="h xl in" style="--d:.25s;margin-top:22px">We are<br>Africans.</div>
+      <div class="lead" data-s="1" style="margin-top:36px">11 countries. Different cultures, languages, traditions, and ways of seeing the world.</div>
+    </div>
+    <div class="abs" style="left:1130px;top:150px;width:700px;display:grid;gap:44px">
+      <div data-s="2"><div class="stat">19</div><div class="stat-l">median age in Nigeria: the youngest continent</div></div>
+      <div data-s="3"><div class="h s">Fastest-growing</div><div class="stat-l">population, markets, capital</div></div>
+      <div data-s="4"><div class="h s" style="color:var(--gold-2)">Limited resources = innovation</div><div class="stat-l">market knowledge · networks · cultural fluency</div></div>
+    </div>${sec(3)}${brand()}`,
+  notes: `<b>Agnes:</b> “And, of course, we are Africans. From 11 different countries, with different cultures, languages, traditions and ways of seeing the world, yet connected by a continent that continues to shape who we are and what we aspire to become.” Strengths: forward-thinking, resourceful, globally minded.` });
+
+add({ sec: 3, title: "We are AFRIKA KOMMT! 15", cls: "dark", steps: 3,
+  html: () => `<canvas class="fx" data-fx="converge"></canvas>
+    <div class="abs" style="left:0;right:0;top:170px;text-align:center">
+      <div class="kick in">05 · And finally</div>
+      <div class="h l" data-s="1" data-fx="blur" style="margin-top:30px">We are</div>
+      <div class="h xl" data-s="2" data-fx="pop" style="font-size:230px;margin-top:10px">AFRIKA KOMMT<span style="color:var(--red)">!</span> <span style="color:var(--gold-2)">15</span></div>
+      <div data-s="3" style="margin-top:56px;display:flex;gap:18px;justify-content:center"><span class="chip">Chosen through a competitive process</span><span class="chip">The 15th cohort</span><span class="chip">A strong alumni network linking German & African business</span></div>
+    </div>${brand()}`,
+  onStep(el, s) { const c = el.querySelector("canvas.fx"); if (c) c.dataset.state = s >= 2 ? "go" : "stop"; if (s === 2) ding(.75); },
+  notes: `<b>Kelvin:</b> “And finally, there is one thing that brings all these different journeys together…” <i>(open TODO in the doc: add a few lines on what it means to be AK15)</i> <b>Agnes & Kelvin:</b> “We are AFRIKA KOMMT! Cohort 15!” Round of applause. <i>Kelvin’s doc comment: ending the section on applause can feel like a premature end; keep it short.</i>` });
+
+add({ sec: 3, title: "Segue: the map (no text)", cls: "cream", steps: 0,
+  html: () => `<div class="abs" style="left:510px;top:30px;width:900px;height:1020px">${mapSVG({ w: 900, h: 1020, hl: COUNTRIES, pins: true, labels: true })}</div>${brand()}`,
+  notes: `<b>No text on screen</b>: the map stays up while Kelvin and Agnes have a short dialogue. <b>Kelvin:</b> “Now, we’ve taken you through some of Africa’s stories. You’ve had a glimpse of who we are, our backgrounds, our experiences, and the journeys that have brought us here. But perhaps you’re now wondering: ‘That’s all very interesting… but what do these people actually bring to the table?’ Well, that’s exactly what we’d like to show you.” <b>Daphine</b> comes in.` });
+
+/* ---------- 4 · What we offer (the /offer slide, 5 builds) ---------- */
+add({ sec: 4, title: "What do we offer? (5 builds)", cls: "cream", steps: 4,
+  html: () => [1, 2, 3, 4, 5].map((k) => `<iframe class="offer${k === 1 ? " on" : ""}" data-k="${k}" title="What we offer, step ${k}" data-src="../../offer/?render=slide&step=${k}"></iframe>`).join(""),
+  onStep(el, s) { el.querySelectorAll("iframe.offer").forEach((f) => f.classList.toggle("on", +f.dataset.k === s + 1)); },
+  notes: `<b>Daphine & David.</b> Five talking points build one after the other: 1 Diversity · 2 Connected expertise · 3 African perspectives · 4 Mutual exchange · 5 32 bridges. The graphic is the live /offer slide; the script draft is on <a href="../offer/" style="color:#d8bf6a">/offer</a>.` });
+
+/* ---------- 5 · Business culture (Mwai) ---------- */
+add({ sec: 5, title: "Business culture: understand the room", cls: "dark", steps: 2,
+  html: () => `<canvas class="fx" data-fx="dust"></canvas>
+    <div class="abs" style="left:110px;top:200px;width:1500px">
+      <div class="kick in">Business culture in Africa</div>
+      <div class="h m in" style="--d:.25s;margin-top:24px">Imagine you’re a German company entering an African market.</div>
+      <div class="lead" data-s="1" style="margin-top:44px;max-width:1300px">You’ve done the research. You’ve booked the meeting. You open your laptop and expect to leave with a signed agreement.</div>
+      <div class="h m" data-s="2" style="margin-top:50px;color:var(--gold-2)">Have you understood the room you’re walking into?</div>
+    </div>${sec(5)}${brand()}`,
+  notes: `<b>Mwai:</b> “Let me start with a question. Imagine you’re a German company looking to enter an African market… But there’s one small problem. Have you understood the room you’re walking into? Because in many African business environments, doing business isn’t just about what you know… It’s also about who you know, how you build trust and how well you understand the context.”` });
+
+add({ sec: 5, title: "A good proposal gets you in the room", cls: "", steps: 6,
+  html: () => {
+    const P = [["Relationships & trust", "Who you know. Who introduces you. Who trusts you."], ["Hierarchy & decisions", "Who decides? Who influences? Who needs to be involved?"], ["Time & negotiation", "Different timelines, processes and expectations. The first price isn’t always the final price."], ["Informal & digital economies", "How people actually earn, spend, trade and pay. Often mobile-first."], ["Language & context", "Africa is not one market. Listen before you assume."], ["Pricing & purchasing power", "Understand what customers value and what they can afford. Offer different price points."]];
+    return `<div class="abs" style="left:110px;top:100px;width:1700px">
+      <div class="kick in">Business culture in Africa</div>
+      <div class="h m g in" style="--d:.2s;margin-top:20px">A good proposal gets you in the room.</div>
+      <div class="h s in" style="--d:.4s;margin-top:12px;color:var(--gold)">Understanding the room gets you further.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px 60px;margin-top:56px">
+        ${P.map((p, i) => `<div class="pillar" data-s="${i + 1}"><h4>${p[0]}</h4><p>${p[1]}</p></div>`).join("")}
+      </div></div>${sec(5)}${brand()}`; },
+  notes: `<b>Mwai:</b> five points, one per click. First, relationships matter, a lot (“sometimes that scenic route is the fastest way to get somewhere”). Second, understand the hierarchy (“don’t assume the most enthusiastic person in the room has the final say!”). Third, time and negotiation. Fourth, Africa’s informal and digital economies. Finally, language and context.` });
+
+add({ sec: 5, title: "One continent. Many business realities.", cls: "cream", steps: 3,
+  html: () => `<div class="panel-l" style="width:620px;background:var(--green-2)"></div>
+    <div class="abs" style="left:80px;top:140px;width:480px;color:#fff"><div class="kick" style="color:var(--gold-2)">Beyond the numbers</div><div class="h m in" style="margin-top:20px">Listen.<br>Understand.<br><span style="color:var(--gold-2)">Adapt.</span></div></div>
+    <div class="abs" style="left:720px;top:130px;width:1100px">
+      <div class="h m g in">One continent.</div><div class="h m in" style="--d:.2s;color:var(--gold)">Many business realities.</div>
+      <div style="display:flex;gap:90px;margin-top:80px">
+        <div data-s="1"><div class="stat"><span data-count="85" data-pre="" data-suf="%+">0</span></div><div class="stat-l">of employment in Africa is informal<br><small>Source: International Labour Organization</small></div></div>
+        <div data-s="2"><div class="stat"><span data-count="1" data-suf=" bn+">0</span></div><div class="stat-l">registered mobile money accounts in Sub-Saharan Africa (2024)<br><small>Source: GSMA</small></div></div>
+      </div>
+      <div class="h s" data-s="3" style="margin-top:70px">Different contexts. <span class="g">Shared opportunities.</span></div>
+    </div>${sec(5)}${brand()}`,
+  onStep(el) { countUp(el); },
+  notes: `<b>Mwai:</b> “According to the International Labour Organization, more than 85% of employment in Africa is informal… According to the GSMA, Sub-Saharan Africa had more than one billion registered mobile money accounts in 2024. Think about that for a moment… And this is where we, as AFRIKA KOMMT! fellows, have an opportunity to contribute… successful international collaboration isn’t about expecting everyone to do business the same way. It’s about understanding each other well enough to do business together.”` });
+
+/* ---------- 6 · Why we take part (Hannah) ---------- */
+add({ sec: 6, title: "Dreaming bigger: from seed to baobab", cls: "dark", steps: 4,
+  html: () => `<canvas class="fx" data-fx="sun"></canvas>
+    <div class="abs" style="left:110px;top:120px;width:760px">
+      <div class="kick in">Why we take part</div>
+      <div class="h l in" style="--d:.25s;margin-top:22px">Dreaming bigger.</div>
+      <div class="lead" data-s="4" style="margin-top:40px">Our talent and potential have always existed. AFRIKA KOMMT! gives us the environment to nurture it.</div>
+    </div>
+    <div class="abs" style="left:420px;top:40px;width:1400px;height:1000px">${baobabSVG({ id: "bb4", w: 1400, h: 1000 })}</div>
+    <div class="ground-line" style="top:796px;left:700px;right:0"></div>
+    <div class="abs" style="left:1120px;top:870px;display:flex;gap:14px">${["Seed", "Sprout", "Young tree", "Baobab"].map((x, i) => `<span class="chip stg" data-i="${i}" style="font-size:20px;padding:8px 18px;opacity:.35">${x}</span>`).join("")}</div>
+    ${sec(6)}${brand()}`,
+  onEnter(el) { const s = el.querySelector("#bb4"); s.dataset.p = 0; grow(s, 0); s.style.transform = "translate(120px,0)"; },
+  onStep(el, s) { tweenGrow(el.querySelector("#bb4"), [0.02, 0.1, 0.32, 0.6, 1][s], 2400); el.querySelectorAll(".stg").forEach((c) => (c.style.opacity = +c.dataset.i === Math.max(0, s - 1) || (s === 0 && c.dataset.i === "0") ? 1 : .35)); },
+  notes: `<b>Hannah.</b> Each click grows the tree: seed → sprout → young tree → full baobab (with roots spreading and sunlight). Message: “Our talent and potential have always existed. We take part because AFRIKA KOMMT! provides an environment in which we can nurture that potential.”` });
+
+add({ sec: 6, title: "Inspired by the trees before us", cls: "cream", steps: 4,
+  html: () => `<div class="abs" style="left:110px;top:100px;width:1700px">
+      <div class="kick in">Alumni inspiration</div>
+      <div class="h m g in" style="--d:.2s;margin-top:20px">Inspired by the trees that came before us.</div>
+      <div style="display:flex;gap:80px;margin-top:70px">
+        <div data-s="1"><div class="stat"><span data-count="400" data-suf="+">0</span></div><div class="stat-l">alumni across 31 African<br>countries since 2008</div></div>
+        <div data-s="2"><div class="stat"><span data-count="50" data-suf="%+">0</span></div><div class="stat-l">still with partner companies<br>in Africa or Germany</div></div>
+        <div data-s="3"><div class="stat"><span data-count="203">0</span></div><div class="stat-l">share knowledge in their<br>countries of origin</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:70px">
+        ${[["Petty Tanghanwaye", "Togo. B. Braun fellow in 2015; now leads B. Braun Medical Ghana."], ["Diana Njeri Waithanji", "Kenya. Joined SAP through the programme in 2021; now a senior cybersecurity engineer in Munich."]].map((a, i) => `<div class="card" data-s="4" style="--d:${i * .15}s;padding:30px 34px;display:flex;gap:28px;align-items:center"><div style="width:110px;height:110px;flex:none;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;font:900 40px var(--head);color:var(--green)">${initials(a[0])}</div><div><div class="h xs g">${a[0]}</div><div class="lead" style="font-size:24px;margin-top:8px">${a[1]}</div></div></div>`).join("")}
+      </div></div>${sec(6)}${brand()}`,
+  onStep(el) { countUp(el); },
+  notes: `<b>Hannah:</b> “We are inspired by those who came before us. Their achievements show what’s possible from this experience, and motivate us to create our own impact.” <i>Alumni photos: take them from the official AFRIKA KOMMT! website (placeholders show initials).</i>` });
+
+add({ sec: 6, title: "Growing through each other", cls: "dark", steps: 3,
+  html: () => `<canvas class="fx" data-fx="exchange"></canvas>
+    <div class="abs" style="left:0;right:0;top:90px;text-align:center"><div class="kick in">Knowledge & cultural exchange</div><div class="h m in" style="--d:.2s;margin-top:18px">Growing through each other.</div></div>
+    <div class="abs" style="left:150px;top:420px;width:360px;text-align:center"><div class="h m">Africa</div></div>
+    <div class="abs" style="right:150px;top:420px;width:360px;text-align:center"><div class="h m">Germany</div></div>
+    <div class="abs" style="left:560px;top:330px;width:800px;display:grid;gap:20px;text-align:center">
+      ${["Business & professional knowledge", "Cultural understanding", "Different approaches to problem-solving", "Language & communication", "Personal experiences & perspectives"].map((x, i) => `<div data-s="${i < 3 ? 1 : 2}" style="--d:${i * .12}s"><span class="chip" style="font-size:26px">${x}</span></div>`).join("")}
+    </div>
+    <div class="abs" data-s="3" style="left:0;right:0;top:850px;text-align:center"><div class="h s" style="color:var(--gold-2)">When you look towards Africa, we’ll be beside you saying: let me show you.</div></div>
+    ${sec(6)}${brand()}`,
+  notes: `<b>Hannah:</b> two-way exchange: we come to learn, and we bring valuable knowledge, expertise and perspectives of our own. Gold particles flow to Germany, green ones flow to Africa. “This is a cultural and experience exchange. When you look towards Africa, we also intend to be standing beside you, saying: let me show you.”` });
+
+/* ---------- 7 · What we expect (Udoka) ---------- */
+add({ sec: 7, title: "What we expect: the roots", cls: "dark", steps: 1,
+  html: () => `<div class="abs" style="left:110px;top:150px;width:820px">
+      <div class="kick in">What we expect</div>
+      <div class="h l in" style="--d:.25s;margin-top:22px">These are<br>the <span style="color:var(--gold-2)">roots.</span></div>
+      <div class="lead" data-s="1" style="margin-top:50px">32 of us answered one question: <b style="color:#fff">what do you expect?</b></div>
+      <div data-s="1" style="--d:.2s;margin-top:30px;display:flex;flex-wrap:wrap;gap:14px">${["Professional growth", "Industry experience", "Leadership", "Networks", "Fresh perspectives"].map((x) => `<span class="chip">${x}</span>`).join("")}</div>
+    </div>
+    <div class="abs" style="left:900px;top:80px;width:1000px;height:900px">${baobabSVG({ id: "bbU1", w: 1000, h: 900 })}</div>
+    ${sec(7)}${brand()}`,
+  onEnter(el) { const s = el.querySelector("#bbU1"); s.dataset.p = 0.1; grow(s, 0.1); tweenGrow(s, 0.42, 2200); },
+  notes: `<b>Udoka:</b> “We’ve heard who we are… These are the roots… My name is Udoka… What do we expect?” One click shows the five themes.` });
+
+add({ sec: 7, title: "Grow · Connect · Contribute", cls: "green", steps: 1,
+  html: () => `<div class="abs" style="left:0;right:0;top:150px;text-align:center">
+      <div class="kick in" style="color:var(--gold-2)">Three ambitions</div>
+      <div class="h xl in" style="--d:.25s;margin-top:26px;font-size:150px">Grow <span style="color:var(--gold-2)">·</span> Connect <span style="color:var(--gold-2)">·</span> Contribute</div>
+      <div data-s="1" style="margin-top:90px">
+        <div class="kick" style="color:var(--gold-2)">What your organisations told us matters</div>
+        <div style="margin-top:22px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center">${["Expertise", "Opportunity", "Innovation", "Sustainability", "Impact"].map((x) => `<span class="chip" style="font-size:28px">${x}</span>`).join("")}</div>
+        <div class="h s" style="margin-top:56px">Mutual benefit, <span style="color:var(--gold-2)">great impact.</span></div>
+      </div>
+    </div>${sec(7)}${brand()}`,
+  notes: `<b>Udoka:</b> “We want to grow. We want to connect. And we want to contribute.” Click: the five themes from the organisations, and “mutual benefit, great impact”.` });
+
+add({ sec: 7, title: "618", cls: "cream", steps: 0,
+  html: () => `<div class="abs" style="left:110px;top:170px;width:1700px">
+      <div class="kick in">Not just an aspiration</div>
+      <div class="bignum in" style="--d:.2s;margin-top:20px"><span data-count="618" data-dur="2200">0</span></div>
+      <div class="h m g in" style="--d:.4s;margin-top:10px">doctors, nurses and biomedical technicians</div>
+      <div class="lead in" style="--d:.6s;margin-top:30px">trained in eighteen months by an AFRIKA KOMMT! alumna who helped set up B. Braun in Ghana.</div>
+    </div>${sec(7)}${brand()}`,
+  onEnter(el) { countUp(el); },
+  notes: `<b>Udoka:</b> the 618 story. <i>To confirm with Udoka and Hannah: the alumna’s name (Akofa?) and the source for 618.</i>` });
+
+add({ sec: 7, title: "German excellence", cls: "dark", steps: 1,
+  html: () => `<div class="abs" style="left:110px;top:150px;width:1700px">
+      <div class="kick in">What we came to learn</div>
+      <div class="h xl in" style="--d:.25s;margin-top:22px">German <span style="color:var(--gold-2)">excellence.</span></div>
+      <div class="in" style="--d:.45s;margin-top:50px;display:flex;flex-wrap:wrap;gap:16px">${["High standards", "Innovation that becomes practical", "Strong systems", "Investment in people", "Built to last"].map((x) => `<span class="chip" style="font-size:28px">${x}</span>`).join("")}</div>
+      <div class="h m" data-s="1" style="margin-top:80px">Bring us into the rooms. <span style="color:var(--gold-2)">Give us real problems.</span> Challenge our thinking.</div>
+    </div>${sec(7)}${brand()}`,
+  notes: `<b>Udoka:</b> her late dad, a mechanical engineer who learned from German engineers… Click: “So we ask: bring us into the rooms. Give us real problems. Challenge our thinking.”` });
+
+add({ sec: 7, title: "Nobody nurtures a tree just to watch it grow", cls: "cream", steps: 0,
+  html: () => `<div class="abs" style="left:110px;top:170px;width:780px">
+      <div class="kick in">Lasting value</div>
+      <div class="h m g in" style="--d:.25s;margin-top:22px">Nobody nurtures a tree just to watch it grow.</div>
+      <div class="lead in" style="--d:.5s;margin-top:40px">We nurture it for the shade, the fruit, and the seeds of the next trees.</div>
+    </div>
+    <div class="abs" style="left:880px;top:60px;width:1000px;height:900px">${baobabSVG({ id: "bbU5", w: 1000, h: 900, fruits: 32 })}</div>
+    ${sec(7)}${brand()}`,
+  onEnter(el) { const s = el.querySelector("#bbU5"); s.dataset.p = 1; grow(s, 1, 1); },
+  notes: `<b>Udoka:</b> “Years from now, someone will ask: did this create lasting value?… Nobody nurtures a tree simply to watch it grow.”` });
+
+add({ sec: 7, title: "A shared vision", cls: "green", steps: 1,
+  html: () => `<div class="abs" style="left:0;right:0;top:190px;text-align:center">
+      <div style="display:grid;gap:18px">${["Not one fellow.", "Not one company.", "Not one industry.", "Not one country."].map((x, i) => `<div class="h m in" style="--d:${0.2 + i * 0.25}s">${x}</div>`).join("")}</div>
+      <div class="h xl" data-s="1" data-fx="pop" style="margin-top:70px;color:var(--gold-2)">A shared vision.</div>
+    </div>${sec(7)}${brand()}`,
+  notes: `<b>Udoka:</b> “No one of us carries all of what is required…” Click: “That is what a shared vision looks like.” Hand over: “To bring it all together, let’s welcome David.”` });
+
+/* ---------- 8 · Outro (David) ---------- */
+add({ sec: 8, title: "The clinic under the baobab", cls: "cream", steps: 2,
+  html: () => `<div class="abs" style="left:110px;top:130px;width:760px">
+      <div class="kick in">Outro</div>
+      <div class="h l g in" style="--d:.2s;margin-top:20px">One nurse.<br>One tablet.</div>
+      <div class="lead" data-s="1" style="margin-top:40px">Everything we do ends with a person who needs one thing to arrive.</div>
+      <div class="h s" data-s="2" style="margin-top:40px;color:var(--gold)">For it to arrive, six things have to go right.</div>
+    </div>
+    <div class="abs" style="left:780px;top:60px;width:1100px;height:900px">${baobabSVG({ id: "bb5", w: 1100, h: 900, clinic: true, roots: false })}</div>
+    <div class="ground-line" style="left:780px;top:800px"></div>${sec(8)}${brand()}`,
+  onEnter(el) { const s = el.querySelector("#bb5"); s.dataset.p = 1; grow(s, 1); },
+  onStep(el, s) { const t = el.querySelector(".tab"); if (t) t.style.filter = s >= 1 ? "drop-shadow(0 0 14px #ffd75e)" : "none"; },
+  notes: `<b>David:</b> a calm, warm scene: the same baobab as the intro, a small clinic in its shade, a nurse beside a patient. The nurse is capable and only waits on the supply chain. Click 1 makes the tablet glow.` });
+
+const SIX = [
+  ["Someone designs how it’s made", "Boehringer Ingelheim", "Dashboard refresh cut from 3 hours to under 20 minutes", false],
+  ["Someone proves it’s safe", "Merck", "1,000+ safety reports; 600+ health workers trained across 86 facilities", false],
+  ["Someone makes sure it meets the standard", "B. Braun", "100+ procedures harmonised; ~90% of corrective actions closed on time", true],
+  ["Someone builds the machines & opens the market", "Bosch", "AI brought into 20+ businesses on 5 continents in 12 months", true],
+  ["Someone finances the shipment", "ODDO BHF", "$40M in letters of credit; straight-through processing 57% → 90%", false],
+  ["Someone moves it at scale", "SAP", "1,600+ telecom sites rolled out; platform costs cut 50%", false],
+];
+add({ sec: 8, title: "Six things that have to go right", cls: "", steps: 6,
+  html: () => `<div class="abs" style="left:110px;top:90px;width:1700px"><div class="kick in">Outro</div><div class="h m g in" style="--d:.2s;margin-top:18px">Six things that have to go right.</div></div>
+    <svg class="abs" style="left:0;top:0" width="1920" height="1080"><path id="sixpath" d="M200,435 C350,435 354,665 504,665 C654,665 658,435 808,435 C958,435 962,665 1112,665 C1262,665 1266,435 1416,435 C1566,435 1570,665 1720,665" fill="none" stroke="var(--line)" stroke-width="8" stroke-dasharray="4 14" stroke-linecap="round"/><path class="sixfill" d="M200,435 C350,435 354,665 504,665 C654,665 658,435 808,435 C958,435 962,665 1112,665 C1262,665 1266,435 1416,435 C1566,435 1570,665 1720,665" fill="none" stroke="var(--green)" stroke-width="8" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" style="transition:stroke-dashoffset 1s"/></svg>
+    ${SIX.map((x, i) => `<div class="step6" data-i="${i + 1}" style="left:${200 + i * 304}px;top:${i % 2 ? 610 : 380}px"><div class="badge">${i + 1}</div><h5>${x[0]}</h5><div class="co">${x[1]}</div><div class="num">${x[2]}${x[3] ? '<span class="unv">unverified</span>' : ""}</div></div>`).join("")}
+    ${sec(8)}${brand()}`,
+  onStep(el, s) { el.querySelectorAll(".step6").forEach((x) => { const on = +x.dataset.i <= s; x.classList.toggle("on", on); x.style.opacity = on ? 1 : .5; }); el.querySelector(".sixfill").style.strokeDashoffset = 1 - s / 6; if (s) ding(1 + s * .08); },
+  notes: `<b>David:</b> one click per stop, from design to delivery. No fellow names on the slide. <b>Accuracy:</b> the SAP figure is corrected to 1,600+ sites (source says 1,600+, not 2,600+). B. Braun and Bosch figures have no source yet: they show an “unverified” tag while notes are open. Confirm with Busayomi before Friday.` });
+
+add({ sec: 8, title: "Thirty-two of us. One nurse.", cls: "dark", steps: 2,
+  html: () => `<canvas class="fx" data-fx="dust"></canvas>
+    <div class="abs" style="left:110px;top:150px;width:760px">
+      <div class="kick in">Outro</div>
+      <div class="h l in" style="--d:.2s;margin-top:20px">Thirty-two of us.<br><span style="color:var(--gold-2)">One nurse.</span></div>
+      <div class="h m" data-s="2" data-fx="blur" style="margin-top:60px">“Show us where your tablet gets stuck.”</div>
+    </div>
+    <div class="abs" style="left:780px;top:60px;width:1100px;height:900px">${baobabSVG({ id: "bb6", w: 1100, h: 900, fruits: 32, clinic: true, roots: false })}</div>
+    ${sec(8)}${brand()}`,
+  onEnter(el) { const s = el.querySelector("#bb6"); s.dataset.p = 1; grow(s, 1, 0); },
+  onStep(el, s) { grow(el.querySelector("#bb6"), 1, s >= 1 ? 1 : 0); if (s === 1) ding(.75); },
+  notes: `<b>David:</b> the same baobab, now in full fruit: the “finally, fruits” moment promised in the introduction. 32 fruits, one per fellow. Click 1: fruits appear. Click 2: the closing line. Our offer is practical: bring us the place where your work gets stuck on its way to the person who needs it.` });
+
+add({ sec: 8, title: "Danke", cls: "green", steps: 0,
+  html: () => `<canvas class="fx" data-fx="dust"></canvas><div class="abs" style="left:0;right:0;top:300px;text-align:center"><div class="h xl in">Danke<span style="color:var(--gold-2)">!</span></div><div class="lead in" style="--d:.3s;margin-top:30px">Thank you · Asante · Ẹ ṣé · Shukran · Merci · Zikomo · Ameseginalehu</div><div class="h s in" style="--d:.5s;margin-top:60px;color:var(--gold-2)">AFRIKA KOMMT! 15</div></div>`,
+  notes: `Close.` });
+
+/* ================= render ================= */
+S.forEach((sl, i) => {
+  const el = document.createElement("section");
+  el.className = "slide " + (sl.cls || "");
+  el.dataset.i = i;
+  el.innerHTML = sl.html().replace(/<canvas class="fx"[^>]*><\/canvas>/g, ""); // ambient canvases removed (lag, 26 Nov feedback)
+  stage.appendChild(el);
+  sl.el = el;
+});
+
+/* ================= ambient canvases ================= */
+function fxLoop() {
+  const cur = S[idx]; if (!cur) return requestAnimationFrame(fxLoop);
+  cur.el.querySelectorAll("canvas.fx").forEach((c) => {
+    if (!c._p) { c.width = 1920; c.height = 1080; seed(9); c._p = Array.from({ length: 140 }, () => ({ x: rnd() * 1920, y: rnd() * 1080, v: .2 + rnd() * .6, r: .8 + rnd() * 2.4, a: rnd() * 6.28, s: rnd() })); }
+    const g = c.getContext("2d"), kind = c.dataset.fx, t = performance.now() / 1000; g.clearRect(0, 0, 1920, 1080);
+    if (kind === "sun") { const gr = g.createRadialGradient(1600, 120, 10, 1600, 120, 700); gr.addColorStop(0, "rgba(255,214,120,.45)"); gr.addColorStop(1, "rgba(255,214,120,0)"); g.fillStyle = gr; g.fillRect(0, 0, 1920, 1080); }
+    if (kind === "spot") { for (let k = 0; k < 3; k++) { const x = 960 + Math.sin(t * .6 + k * 2.1) * 620, gr = g.createRadialGradient(x, 1080, 10, x, 400, 900); gr.addColorStop(0, "rgba(255,255,255,.16)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = gr; g.beginPath(); g.moveTo(x - 60, 1080); g.lineTo(x - 420, 0); g.lineTo(x + 420, 0); g.lineTo(x + 60, 1080); g.fill(); } }
+    const stop = c.dataset.state === "stop";
+    for (const p of c._p) {
+      if (kind === "exchange") {
+        const dir = p.s > .5 ? 1 : -1, y = 470 + Math.sin(p.a + t) * 160 * p.s;
+        p.x += dir * (2 + p.v * 3); if (p.x > 1620) p.x = 300; if (p.x < 300) p.x = 1620;
+        g.fillStyle = dir > 0 ? "rgba(216,191,106,.85)" : "rgba(134,178,94,.85)"; g.beginPath(); g.arc(p.x, y, p.r + 1, 0, 6.28); g.fill(); continue;
+      }
+      if (kind === "converge") {
+        const k = c.dataset.state === "go" ? 1 : 0, tx = 960 + Math.cos(p.a) * 520 * (1 - k * .55), ty = 560 + Math.sin(p.a) * 300 * (1 - k * .55);
+        p.x += (tx - p.x) * .03; p.y += (ty - p.y) * .03; p.a += .002;
+        g.fillStyle = "rgba(216,191,106,.6)"; g.beginPath(); g.arc(p.x, p.y, p.r + .6, 0, 6.28); g.fill(); continue;
+      }
+      if (kind === "freeze") {
+        if (!stop) { p.x += Math.cos(p.a) * p.v * 1.6; p.y += Math.sin(p.a) * p.v * 1.6; p.a += (rnd() - .5) * .08; }
+        if (p.x < 0) p.x = 1920; if (p.x > 1920) p.x = 0; if (p.y < 0) p.y = 1080; if (p.y > 1080) p.y = 0;
+        g.fillStyle = stop ? "rgba(45,106,57,.18)" : "rgba(45,106,57,.35)"; g.beginPath(); g.arc(p.x, p.y, p.r * 2, 0, 6.28); g.fill(); continue;
+      }
+      p.y -= p.v * .5; p.x += Math.sin(t + p.a) * .25; if (p.y < -10) { p.y = 1090; p.x = rnd() * 1920; }
+      g.fillStyle = `rgba(216,191,106,${(.15 + .35 * Math.abs(Math.sin(t * .8 + p.a))).toFixed(2)})`; g.beginPath(); g.arc(p.x, p.y, p.r, 0, 6.28); g.fill();
+    }
+  });
+  requestAnimationFrame(fxLoop);
+}
+
+/* ================= navigation ================= */
+let idx = 0, step = 0, started = false;
+function fit() { const k = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `translate(-50%, -50%) scale(${k})`; }
+addEventListener("resize", fit); fit();
+function applyStep(sl, s, fromEnter) {
+  sl.el.querySelectorAll("[data-s]").forEach((e) => e.classList.toggle("on", s >= +e.dataset.s));
+  sl.el.querySelectorAll("[data-x]").forEach((e) => e.classList.toggle("off", s >= +e.dataset.x));
+  countUp(sl.el);
+  if (sl.onStep) sl.onStep(sl.el, s, fromEnter);
+}
+function go(i, s = 0, dir = 1) {
+  i = Math.max(0, Math.min(S.length - 1, i));
+  const prev = S[idx];
+  if (i !== idx || !prev.el.classList.contains("active")) {
+    prev.el.classList.remove("active");
+    if (started && i !== idx) whoosh();
+    const sl = S[i];
+    resetCounts(sl.el);
+    sl.el.querySelectorAll(".in").forEach((e) => { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
+    sl.el.classList.add("active");
+    if (sl.onEnter) sl.onEnter(sl.el);
+  }
+  S.forEach((x, j) => { const near = Math.abs(j - i) <= 1; x.el.classList.toggle("near", near); if (near) x.el.querySelectorAll("iframe[data-src]:not([src])").forEach((f) => (f.src = f.dataset.src)); });
+  idx = i; step = Math.max(0, Math.min(S[i].steps || 0, s));
+  applyStep(S[i], step, true);
+  ui();
+}
+function next() { if (!started) return begin(); const sl = S[idx]; if (step < (sl.steps || 0)) { step++; applyStep(sl, step); if (idx === 0 && step === 1) deepNote(); ui(); } else if (idx < S.length - 1) go(idx + 1, 0); }
+function prev() { const sl = S[idx]; if (step > 0) { step--; applyStep(sl, step); ui(); } else if (idx > 0) go(idx - 1, S[idx - 1].steps || 0, -1); }
+function ui() {
+  const sl = S[idx];
+  document.getElementById("pos").textContent = `${idx + 1} / ${S.length}${sl.steps ? ` · ${step}/${sl.steps}` : ""}`;
+  document.getElementById("progress").style.width = ((idx + (sl.steps ? step / sl.steps : 1)) / S.length * 100).toFixed(2) + "%";
+  document.getElementById("notes").innerHTML = `<h6>${esc(SECS[sl.sec])} · ${idx + 1}. ${esc(sl.title)}</h6><p>${sl.notes || ""}</p>`;
+  history.replaceState(null, "", `#${idx + 1}${step ? "." + step : ""}`);
+  document.querySelectorAll("#grid button[data-i]").forEach((b) => b.classList.toggle("cur", +b.dataset.i === idx));
+}
+function begin() { started = true; document.getElementById("start").remove(); try { ac().resume(); } catch (e) {} }
+// grid of all slides
+(() => {
+  let h = `<h2>All slides</h2><p class="help">Click a slide to jump to it. G or Esc closes this.</p>`;
+  SECS.forEach((name, si) => {
+    const items = S.map((s, i) => [s, i]).filter(([s]) => s.sec === si);
+    if (!items.length) return;
+    h += `<section><h3>${String(si).padStart(2, "0")} · ${esc(name)}</h3><div class="items">${items.map(([s, i]) => `<button data-i="${i}">${i + 1}. ${esc(s.title)}</button>`).join("")}</div></section>`;
+  });
+  const g = document.getElementById("grid"); g.innerHTML = h;
+  g.addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (!b) return; if (!started) begin(); document.body.classList.remove("grid-on"); go(+b.dataset.i, 0); });
+})();
+function toggle(c) { document.body.classList.toggle(c); }
+function fs() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
+function mute() { muted = !muted; if (!muted) { try { ac().resume(); } catch (e) {} } document.getElementById("muteBtn").textContent = muted ? "Sound off" : "Sound on"; }
+if (!muted) document.getElementById("muteBtn").textContent = "Sound on";
+addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === " " || k === "PageDown" || k === "Enter") { e.preventDefault(); next(); }
+  else if (k === "ArrowLeft" || k === "PageUp" || k === "Backspace") { e.preventDefault(); prev(); }
+  else if (k === "Home") go(0); else if (k === "End") go(S.length - 1);
+  else if (k === "f" || k === "F") fs();
+  else if (k === "n" || k === "N") toggle("notes-on");
+  else if (k === "g" || k === "G") toggle("grid-on");
+  else if (k === "m" || k === "M") mute();
+  else if (k === "Escape") document.body.classList.remove("grid-on");
+  else if (k === "b" || k === "B" || k === ".") stage.style.opacity = stage.style.opacity === "0" ? "" : "0";
+});
+document.getElementById("start").addEventListener("click", begin);
+let lastClick = 0;
+stage.addEventListener("click", (e) => { if (e.target.closest("a,button,iframe")) return; const t = performance.now(); if (t - lastClick < 350) return; lastClick = t; next(); });
+document.getElementById("hud").addEventListener("click", (e) => { const a = e.target.closest("button")?.dataset.a; if (a === "prev") prev(); if (a === "next") next(); if (a === "grid") toggle("grid-on"); if (a === "notes") toggle("notes-on"); if (a === "mute") mute(); if (a === "fs") fs(); });
+let hudT; addEventListener("mousemove", () => { document.body.classList.add("hud-show"); clearTimeout(hudT); hudT = setTimeout(() => document.body.classList.remove("hud-show"), 1800); });
+let tx0 = null; addEventListener("touchstart", (e) => { tx0 = e.touches[0].clientX; }, { passive: true });
+addEventListener("touchend", (e) => { if (tx0 == null) return; const dx = e.changedTouches[0].clientX - tx0; if (Math.abs(dx) > 50) (dx < 0 ? next : prev)(); tx0 = null; });
+
+const m = location.hash.match(/^#(\d+)(?:\.(\d+))?/);
+const qs = new URLSearchParams(location.search);
+if (qs.has("notes")) document.body.classList.add("presenter"); // presenter view: /deck/?notes
+if (m || qs.has("nostart")) { begin(); go(m ? +m[1] - 1 : 0, m && m[2] ? +m[2] : 0); } else go(0, 0);
+})();
+</script>
+</body>
+</html>

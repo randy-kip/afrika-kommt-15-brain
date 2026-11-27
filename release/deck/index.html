@@ -227,9 +227,9 @@ html.still *, html.still *::after { transition: none !important; animation-durat
 <div id="grid"></div>
 <div id="start"><div><b>AFRIKA KOMMT! 15</b><span>Click or press <kbd>Space</kbd> to begin. Sound is off; press <kbd>M</kbd> to turn it on.<br><kbd>→</kbd> next · <kbd>←</kbd> back · <kbd>F</kbd> full screen · <kbd>G</kbd> all slides · <kbd>B</kbd> blank screen · <kbd>M</kbd> sound</span></div></div>
 
-<script src="../data.js?v=mwyyl0u4"></script>
-<script src="../africa.js?v=mwyyl0u4"></script>
-<script src="facts.js?v=mwyyl0u4"></script>
+<script src="../data.js?v=mwyz2k2v"></script>
+<script src="../africa.js?v=mwyz2k2v"></script>
+<script src="facts.js?v=mwyz2k2v"></script>
 <script>
 (() => {
 "use strict";
@@ -693,11 +693,61 @@ add({ sec: 3, title: "Segue: the map (no text)", cls: "cream", steps: 0,
   html: () => `<div class="abs" style="left:510px;top:30px;width:900px;height:1020px">${mapSVG({ w: 900, h: 1020, hl: COUNTRIES, pins: true, labels: true })}</div>${brand()}`,
   notes: `<b>No text on screen</b>: the map stays up while Kelvin and Agnes have a short dialogue. <b>Kelvin:</b> “Now, we’ve taken you through some of Africa’s stories. You’ve had a glimpse of who we are, our backgrounds, our experiences, and the journeys that have brought us here. But perhaps you’re now wondering: ‘That’s all very interesting… but what do these people actually bring to the table?’ Well, that’s exactly what we’d like to show you.” <b>Daphine</b> comes in.` });
 
-/* ---------- 4 · What we offer (the /offer slide, 5 builds) ---------- */
-add({ sec: 4, title: "What do we offer? (5 builds)", cls: "cream", steps: 4,
-  html: () => [1, 2, 3, 4, 5].map((k) => `<iframe class="offer${k === 1 ? " on" : ""}" data-k="${k}" title="What we offer, step ${k}" data-src="../offer/?render=slide&step=${k}"></iframe>`).join(""),
-  onStep(el, s) { el.querySelectorAll("iframe.offer").forEach((f) => f.classList.toggle("on", +f.dataset.k === s + 1)); },
-  notes: `<b>Daphine & David.</b> Five talking points build one after the other: 1 Diversity · 2 Connected expertise · 3 African perspectives · 4 Mutual exchange · 5 32 bridges. The graphic is the live /offer slide; the script draft is on <a href="../offer/" style="color:#d8bf6a">/offer</a>.` });
+/* ---------- 4 · What we offer (David & Daphine; 4 slides from the doc tab "What We Offer - David & Daphine", 27 Nov) ---------- */
+const FID = (id) => fellows.find((f) => f.id === id) || { id, short: id, name: id, photo: null };
+const ring = (f, size, extra = "") => `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex:none;background:var(--green-soft);display:grid;place-items:center;font:800 ${Math.round(size / 3)}px var(--head);color:var(--green);${extra}">${photo(f)}</div>`;
+const OFFER_CSS = `<style>.ofimg img{width:100%;height:100%;object-fit:cover;display:block}.ofimg .ini{width:100%;height:100%;display:grid;place-items:center}
+.ofstat{flex:1;text-align:center;padding:26px 10px;border-left:2px solid rgba(255,255,255,.18)}.ofstat:first-child{border-left:0}.ofstat b{display:block;font:900 120px/1 var(--head);letter-spacing:-.04em;color:var(--gold-2)}.ofstat span{font:700 30px var(--head);color:#fff;letter-spacing:.02em}
+.ofcard{background:#fff;border-radius:28px;box-shadow:0 18px 50px rgba(0,0,0,.25);padding:30px 34px;display:flex;gap:26px;align-items:center;color:var(--ink)}.ofcard h4{margin:0 0 8px;font:900 34px/1.05 var(--head);color:var(--green-2);letter-spacing:-.02em}.ofcard p{margin:0;font:500 25px/1.35 var(--body);color:var(--ink-2)}.ofcard .ofimg img,.ofcard .ofimg .ini{border-radius:50%}
+.oftile{background:#fff;border-radius:24px;box-shadow:0 10px 34px rgba(23,59,32,.12);padding:22px 20px 26px;text-align:center;opacity:.28;transform:scale(.96);transition:opacity .6s,transform .6s}.oftile.on{opacity:1;transform:scale(1.04)}.oftile .ofimg{width:150px;height:150px;margin:0 auto 16px;border-radius:50%;overflow:hidden}.oftile h5{margin:0 0 8px;font:900 32px var(--head);color:var(--green-2)}.oftile div.l{font:600 21px/1.3 var(--body);color:var(--ink-2)}
+svg.net line{stroke:rgba(216,191,106,.35);stroke-width:1.6;animation:netp 4s ease-in-out infinite}svg.net circle{fill:rgba(255,255,255,.75)}@keyframes netp{0%,100%{stroke-opacity:.25}50%{stroke-opacity:1}}
+svg.arcs path.arc{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.6s ease}.on-arcs svg.arcs path.arc{stroke-dashoffset:0}</style>`;
+
+add({ sec: 4, title: "What do we offer? 32 · 11 · 8", cls: "dark", steps: 3,
+  html: () => `${OFFER_CSS}<div class="abs" style="left:0;top:0;width:1920px;height:1080px;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(4,1fr);opacity:.55">${fellows.slice().sort((a, b) => a.id.localeCompare(b.id)).map((f) => `<div class="ofimg" style="overflow:hidden;background:var(--green-3);font:800 54px var(--head);color:rgba(255,255,255,.5)">${photo(f)}</div>`).join("")}</div>
+    <div class="abs" style="left:0;top:0;width:1920px;height:1080px;background:linear-gradient(180deg,rgba(14,32,18,.55) 0%,rgba(14,32,18,.25) 40%,rgba(14,32,18,.92) 78%)"></div>
+    <div class="abs" style="left:110px;top:120px"><div class="kick in" style="color:var(--gold-2)">What we offer</div><div class="h l in" style="--d:.2s;margin-top:18px;color:#fff">What do we offer?</div><div class="lead in" style="--d:.4s;color:rgba(255,255,255,.85);margin-top:22px">Short answer: a lot.</div></div>
+    <div class="abs" style="left:110px;right:110px;bottom:120px;display:flex">
+      <div class="ofstat" data-s="1"><b>32</b><span>fellows</span></div>
+      <div class="ofstat" data-s="2"><b>11</b><span>countries</span></div>
+      <div class="ofstat" data-s="3"><b>8</b><span>areas of expertise</span></div></div>${sec(4)}`,
+  notes: `<b>Daphine / David.</b> Group photo with three numbers, one per click: 32 fellows · 11 countries · 8 areas of expertise. Message: “Short answer: a lot. This is the range in the room.” <i>The background is a mosaic of all 32 photos until the official group photo arrives (and Randy’s work image, due this evening).</i>` });
+
+add({ sec: 4, title: "Connected expertise: 31 of 32", cls: "dark", steps: 3,
+  html: () => { seed(15); const N = 46, P = Array.from({ length: N }, () => [60 + rnd() * 1800, 60 + rnd() * 960]); let L = "";
+    P.forEach((a, i) => P.forEach((b, j) => { if (j > i && Math.hypot(a[0] - b[0], a[1] - b[1]) < 300) L += `<line x1="${a[0].toFixed(0)}" y1="${a[1].toFixed(0)}" x2="${b[0].toFixed(0)}" y2="${b[1].toFixed(0)}" style="animation-delay:${(rnd() * 4).toFixed(2)}s"/>`; }));
+    const card = (ids, t, line, s) => `<div class="ofcard" data-s="${s}"><div style="display:flex">${ids.map((id, k) => ring(FID(id), 120, k ? "margin-left:-28px;border:5px solid #fff" : "border:5px solid #fff").replace("<div style", '<div class="ofimg" style')).join("")}</div><div><h4>${t}</h4><p>${line}</p></div></div>`;
+    return `${OFFER_CSS}<svg class="net abs" style="left:0;top:0;opacity:.6" width="1920" height="1080">${L}${P.map((p) => `<circle cx="${p[0].toFixed(0)}" cy="${p[1].toFixed(0)}" r="6"/>`).join("")}</svg>
+    <div class="abs" style="left:0;top:0;width:1920px;height:1080px;background:radial-gradient(ellipse at 30% 40%,rgba(14,32,18,.35),rgba(14,32,18,.85))"></div>
+    <div class="abs" style="left:110px;top:110px;width:1000px"><div class="kick in" style="color:var(--gold-2)">Connected expertise</div>
+      <div class="h m in" style="--d:.2s;margin-top:22px;color:#fff;line-height:1"><span style="color:var(--gold-2)">31 of 32</span> of us share a skill with someone from a different field.</div></div>
+    <div class="abs" style="left:1140px;top:170px;width:680px;display:grid;gap:30px">
+      ${card(["F23", "F09"], "Luciana + Randy: Health + AI", "Healthcare delivery designed with technology from day one.", 1)}
+      ${card(["F24"], "Hannah: Payments + Sustainability", "A payments mind on a sustainability challenge.", 2)}
+      ${card(["F13"], "Iredia: Structural Engineering + SAP", "Concrete to code.", 3)}</div>
+    <div class="abs h xs" data-s="3" style="left:110px;top:840px;width:900px;color:rgba(255,255,255,.9)">A challenge never sits in one corner of the room.</div>${sec(4)}`; },
+  notes: `<b>Daphine / David.</b> “31 of 32 of us share a skill with someone from a different field.” Each click brings in a card: <b>Luciana + Randy</b> (Health + AI: healthcare delivery designed with technology from day one) · <b>Hannah</b> (Payments + Sustainability) · <b>Iredia</b> (Structural Engineering + SAP: concrete to code). Message: “A challenge never sits in one corner of the room.” <i>Figures (31 of 32, 8 areas) come from Randy’s offer page; use one number everywhere.</i>` });
+
+const PASS = [["F16", "Annie", "11 emerging markets (Citi)"], ["F14", "Praise", "Africa CDC HQ, Addis Ababa"], ["F22", "Daphine", "Gates Foundation Scholar"], ["F17", "Vivian", "A central bank, Rwanda, Ethiopia"], ["F02", "Kelvin", "World Bank policy paper"], ["F11", "Mwai", "~1M users, 70+ stores"], ["F28", "Busayo", "Erasmus Mundus, 3 countries"]];
+add({ sec: 4, title: "CVs that read like passports (7 tiles)", cls: "cream", steps: 7,
+  html: () => `${OFFER_CSS}<div class="abs" style="left:110px;top:90px"><div class="kick in">International experience</div><div class="h m in" style="--d:.2s;margin-top:18px">Some of our CVs read like passports.</div>
+      <div class="in" style="--d:.4s;margin-top:26px;display:flex;gap:14px;flex-wrap:wrap">${["London", "Johannesburg", "Munich", "Turin", "Saint-Étienne"].map((c) => `<span class="chip" style="font-size:22px;padding:9px 20px">✈ ${c}</span>`).join("")}</div></div>
+    <div class="abs" style="left:110px;right:110px;top:440px;display:grid;grid-template-columns:repeat(7,1fr);gap:22px">${PASS.map(([id, n, l], i) => `<div class="oftile" data-i="${i + 1}"><div class="ofimg">${photo(FID(id))}</div><h5>${n}</h5><div class="l">${esc(l)}</div></div>`).join("")}</div>
+    <div class="abs lead" style="left:110px;top:850px">The international experience is already in the room.</div>${sec(4)}${brand()}`,
+  onStep(el, s) { el.querySelectorAll(".oftile").forEach((t) => t.classList.toggle("on", +t.dataset.i <= s)); },
+  notes: `<b>Daphine / David.</b> Seven tiles, one per click; the presenter says the detail: <b>Annie</b> 11 emerging markets (Citi) · <b>Praise</b> Africa CDC HQ, Addis Ababa · <b>Daphine</b> Gates Foundation Scholar · <b>Vivian</b> a central bank, Rwanda, Ethiopia · <b>Kelvin</b> World Bank policy paper · <b>Mwai</b> ~1M users, 70+ stores · <b>Busayo</b> Erasmus Mundus, 3 countries. Studied in London, Johannesburg, Munich, Turin, Saint-Étienne. Message: “The international experience is already in the room.” <i>Each named fellow should agree to their photo, name and claim.</i>` });
+
+add({ sec: 4, title: "32 bridges between Germany and Africa", cls: "cream", steps: 2,
+  html: () => { const W = 760, H = 800, L = 140, T = 250, p = proj(W, H, 10), G = p([10.4, 51.2]), gx = L + G[0], gy = T + G[1]; seed(32); let arcs = "";
+    fellows.forEach((f, i) => { const c = CENTER_FIX[f.country]; if (!c) return; const [x0, y0] = p(c), sx = L + x0 + (rnd() - .5) * 26, sy = T + y0 + (rnd() - .5) * 26, mx = (sx + gx) / 2 + 120 + rnd() * 160, my = (sy + gy) / 2 - 40;
+      arcs += `<path class="arc" pathLength="1" d="M${sx.toFixed(0)},${sy.toFixed(0)} Q${mx.toFixed(0)},${my.toFixed(0)} ${gx.toFixed(0)},${gy.toFixed(0)}" style="transition-delay:${(i * 0.04).toFixed(2)}s"/>`; });
+    return `${OFFER_CSS}<div class="abs" style="left:${L}px;top:${T}px;width:${W}px;height:${H}px">${mapSVG({ w: W, h: H, hl: COUNTRIES })}</div>
+    <svg class="arcs abs" style="left:0;top:0" width="1920" height="1080">${arcs}<circle cx="${gx.toFixed(0)}" cy="${gy.toFixed(0)}" r="16" fill="var(--green)"/></svg>
+    <div class="abs" style="left:${(gx + 30).toFixed(0)}px;top:${(gy - 26).toFixed(0)}px;font:900 40px var(--head);color:var(--green-2)">Germany</div>
+    <div class="abs" data-s="1" style="left:${(gx + 30).toFixed(0)}px;top:${(gy + 30).toFixed(0)}px;display:flex;gap:12px;flex-wrap:wrap;width:820px">${SIX.map((x) => `<span class="chip" style="font-size:21px;padding:8px 18px">${esc(x[1])}</span>`).join("")}</div>
+    <div class="abs" style="left:1080px;top:520px;width:760px"><div class="h m"><span style="color:var(--gold)">32</span> bridges between Germany and Africa.</div><div class="h s" data-s="2" style="margin-top:40px;color:var(--green)">That is what we offer.</div></div>${sec(4)}${brand()}`; },
+  onEnter(el) { el.classList.remove("on-arcs"); setTimeout(() => el.classList.add("on-arcs"), 300); },
+  notes: `<b>Daphine / David.</b> 32 arcs run from the 11 fellows’ countries to Germany (one per fellow). Click 1: the six host companies at the German end (plain names, no logos until brand rules are checked). Click 2: “That is what we offer.” Message: knowledge, business and ideas, travelling in both directions.` });
 
 /* ---------- 5 · Business culture (Mwai) ---------- */
 add({ sec: 5, title: "Business culture: understand the room", cls: "dark", steps: 2,
